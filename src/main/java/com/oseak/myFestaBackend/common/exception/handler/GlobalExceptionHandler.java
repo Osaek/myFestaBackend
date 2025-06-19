@@ -1,12 +1,14 @@
 package com.oseak.myFestaBackend.common.exception.handler;
 
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.BaseErrorCode;
-import com.oseak.myFestaBackend.common.exception.code.CommonErrorCode;
+import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.common.exception.util.MessageUtil;
 import com.oseak.myFestaBackend.common.response.ApiResponse;
 
@@ -50,7 +52,7 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Void>> handleGeneralError(Exception ex) {
-		CommonErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR_500;
+		ServerErrorCode errorCode = ServerErrorCode.INTERNAL_SERVER_ERROR;
 
 		return buildErrorResponse(
 			errorCode,
@@ -68,6 +70,7 @@ public class GlobalExceptionHandler {
 		String localizedMessage = messageUtil.getMessage(errorCode.getMessageKey());
 		return ResponseEntity
 			.status(errorCode.getHttpStatus())
+			.headers(buildDefaultHeaders())
 			.body(ApiResponse.fail(
 				errorCode.getHttpStatus(),
 				errorCode.getCode(),
@@ -85,10 +88,30 @@ public class GlobalExceptionHandler {
 	private ResponseEntity<ApiResponse<Void>> buildErrorResponse(BaseErrorCode errorCode, String customMessage) {
 		return ResponseEntity
 			.status(errorCode.getHttpStatus())
+			.headers(buildDefaultHeaders())
 			.body(ApiResponse.fail(
 				errorCode.getHttpStatus(),
 				errorCode.getCode(),
 				customMessage
 			));
 	}
+
+	/**
+	 * 공통 응답 헤더를 생성합니다.
+	 *
+	 * <p>모든 API 응답에 공통적으로 포함될 헤더를 설정합니다.
+	 * 현재 포함된 헤더는 다음과 같습니다:</p>
+	 *
+	 * <ul>
+	 *   <li><b>Content-Language</b>: 다국어 처리를 위한 응답 메시지 언어 (예: ko, en)</li>
+	 * </ul>
+	 *
+	 * @return 공통 헤더가 포함된 {@link HttpHeaders} 객체
+	 */
+	private HttpHeaders buildDefaultHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Language", LocaleContextHolder.getLocale().getLanguage());
+		return headers;
+	}
+
 }
