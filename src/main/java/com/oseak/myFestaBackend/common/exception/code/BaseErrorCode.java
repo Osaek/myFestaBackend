@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 /**
  * 모든 에러 코드 enum이 구현해야 하는 공통 인터페이스입니다.
  * - HTTP 상태 코드
- * - 커스텀 코드 (예: OSAEK-COM-001)
+ * - 커스텀 코드 (예: OSAEK-00001)
  * - 사용자 메시지
  */
 public interface BaseErrorCode {
@@ -16,7 +16,7 @@ public interface BaseErrorCode {
 	HttpStatus getHttpStatus();
 
 	/**
-	 * 비즈니스 용 커스텀 에러 코드 (예: "OSAEK-COM-001")
+	 * 비즈니스 용 커스텀 에러 코드 (예: OSAEK-00001)
 	 */
 	String getCode();
 
