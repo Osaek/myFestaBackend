@@ -11,8 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oseak.myFestaBackend.common.exception.OsaekException;
+import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.domain.Member;
 import com.oseak.myFestaBackend.domain.MemberOauthToken;
 import com.oseak.myFestaBackend.repository.MemberOauthTokenRepository;
@@ -45,36 +50,56 @@ public class KakaoApiService {
 		);
 	}
 
-	public Map<String, Object> getKakaoToken(String code) throws Exception {
-		String response = webClient.post()
-			.uri("https://kauth.kakao.com/oauth/token")
-			.header("Content-Type", "application/x-www-form-urlencoded")
-			.body(BodyInserters.fromFormData("grant_type", "authorization_code")
-				.with("client_id", clientId)
-				.with("client_secret", clientSecret)
-				.with("redirect_uri", redirectUri)
-				.with("code", code))
-			.retrieve()
-			.bodyToMono(String.class)
-			.block();
+	public Map<String, Object> getKakaoToken(String code) {
+		String response;
+		try {
+			response = webClient.post()
+				.uri("https://kauth.kakao.com/oauth/token")
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.body(BodyInserters.fromFormData("grant_type", "authorization_code")
+					.with("client_id", clientId)
+					.with("client_secret", clientSecret)
+					.with("redirect_uri", redirectUri)
+					.with("code", code))
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+		} catch (WebClientResponseException e) {
+			throw new OsaekException(ServerErrorCode.TOKEN_REQUEST_FAILED);
+		}
 
-		return objectMapper.readValue(response, Map.class);
+		try {
+			return objectMapper.readValue(response, new TypeReference<Map<String, Object>>() {
+			});
+		} catch (JsonProcessingException e) {
+			throw new OsaekException(ServerErrorCode.INVALID_JSON);
+		}
 	}
 
-	public Map<String, Object> getUserInfo(String accessToken) throws Exception {
-		String response = webClient.get()
-			.uri("https://kapi.kakao.com/v2/user/me")
-			.header("Authorization", "Bearer " + accessToken)
-			.retrieve()
-			.bodyToMono(String.class)
-			.block();
+	public Map<String, Object> getUserInfo(String accessToken) {
+		String response;
+		try {
+			response = webClient.get()
+				.uri("https://kapi.kakao.com/v2/user/me")
+				.header("Authorization", "Bearer " + accessToken)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+		} catch (WebClientResponseException e) {
+			throw new OsaekException(ServerErrorCode.USER_INFO_REQUEST_FAILED);
+		}
 
-		return objectMapper.readValue(response, Map.class);
+		try {
+			return objectMapper.readValue(response, new TypeReference<Map<String, Object>>() {
+			});
+		} catch (JsonProcessingException e) {
+			throw new OsaekException(ServerErrorCode.INVALID_JSON);
+		}
 	}
 
 	//TODO : 결과 확인을 위해 string으로 반환 추후에 void로 변환
 	@Transactional
-	public String kakaoLoginProcess(String code) throws Exception {
+	public String kakaoLoginProcess(String code) {
 		Map<String, Object> tokenMap = getKakaoToken(code);
 		String accessToken = (String)tokenMap.get("access_token");
 		String refreshToken = (String)tokenMap.get("refresh_token");
@@ -82,18 +107,30 @@ public class KakaoApiService {
 		long expiresIn = Long.parseLong(tokenMap.get("expires_in").toString());
 		long refreshExpiresIn = Long.parseLong(tokenMap.get("refresh_token_expires_in").toString());
 
-		LocalDateTime accessExpiresAt = LocalDateTime.ofInstant(Instant.now().plusSeconds(expiresIn),
-			ZoneId.systemDefault());
-		LocalDateTime refreshExpiresAt = LocalDateTime.ofInstant(Instant.now().plusSeconds(refreshExpiresIn),
-			ZoneId.systemDefault());
+		LocalDateTime accessExpiresAt = LocalDateTime.ofInstant(
+			Instant.now().plusSeconds(expiresIn), ZoneId.systemDefault());
+		LocalDateTime refreshExpiresAt = LocalDateTime.ofInstant(
+			Instant.now().plusSeconds(refreshExpiresIn), ZoneId.systemDefault());
 
 		Map<String, Object> userInfo = getUserInfo(accessToken);
-		Map<String, Object> kakaoAccount = (Map<String, Object>)userInfo.get("kakao_account");
-		Map<String, Object> profile = (Map<String, Object>)kakaoAccount.get("profile");
+
+		Map<String, Object> kakaoAccount;
+		Map<String, Object> profile;
+
+		try {
+			kakaoAccount = (Map<String, Object>)userInfo.get("kakao_account");
+			profile = (Map<String, Object>)kakaoAccount.get("profile");
+		} catch (Exception e) {
+			throw new OsaekException(ServerErrorCode.MALFORMED_RESPONSE);
+		}
 
 		String email = (String)kakaoAccount.get("email");
 		String nickname = (String)profile.get("nickname");
 		String profileImage = (String)profile.get("profile_image_url");
+
+		if (email == null || nickname == null) {
+			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
+		}
 
 		Optional<Member> existingMember = memberRepository.findByEmail(email);
 		if (existingMember.isPresent()) {

@@ -40,9 +40,9 @@ public class KakaoController {
 		description = "카카오 인증 서버로부터 인가 코드(code)를 수신한 뒤, 로그인 처리를 수행합니다."
 	)
 	@GetMapping("/login/oauth2/code/kakao")
-	public String kakaoCallback(@RequestParam("code") String code) throws Exception {
+	public String kakaoCallback(@RequestParam("code") String code) {
 		String result = kakaoApiService.kakaoLoginProcess(code);
 		log.info("카카오 로그인 처리 결과: {}", result);
-		return "redirect:/";
+		return "redirect:/"; // TODO: 성공 후 이동할 URL 확정
 	}
 }
