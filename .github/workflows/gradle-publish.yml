@@ -405,20 +405,67 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const status = "${{ needs.deploy-blue-green.result }}" === "success" ? "✅ Success" : "❌ Failed";
-          const deploymentUrl = "http://${{ env.EC2_HOST }}";
+          const deployResult = "${{ needs.deploy-blue-green.result }}";
+          const isSuccess = deployResult === "success";
+          const statusIcon = isSuccess ? "✅" : "❌";
+          const statusText = isSuccess ? "Success" : "Failed";
+          const appUrl = "http://${{ env.EC2_HOST }}";
+          const dockerImage = "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest";
+          const commitSha = "${{ github.sha }}";
+          
+          let message;
+          if (isSuccess) {
+            message = "The application has been successfully deployed and is ready for testing!";
+          } else {
+            message = "Deployment failed. Please check the logs and try again.";
+          }
+          
+          const commentBody = [
+            "## 🚀 Deployment Status: " + statusIcon + " " + statusText,
+            "",
+            "**Application URL**: " + appUrl,
+            "**Docker Image**: `" + dockerImage + "`", 
+            "**Commit**: " + commitSha,
+            "",
+            message
+          ].join("\n");
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `## 🚀 Deployment Status: ${status}
-            
-**Application URL**: ${deploymentUrl}
-**Docker Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`
-**Commit**: ${{ github.sha }}
+            body: commentBody
+          });
 
-${status === "✅ Success" ? 
-  "The application has been successfully deployed and is ready for testing!" : 
-  "Deployment failed. Please check the logs and try again."}`
-          })
+  discord-notification:
+    needs: [deploy-blue-green]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Send Discord Notification
+        run: |
+          STATUS="${{ needs.deploy-blue-green.result }}"
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+          APP_URL="http://${{ env.EC2_HOST }}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          BRANCH="${{ github.ref_name }}"
+          WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
+          MESSAGE=""
+
+          if [ "$STATUS" = "success" ]; then
+            MESSAGE="✅ **Deployment Successful!**
+            - **Branch**: \`$BRANCH\`
+            - **App**: <$APP_URL>
+            - **Docker**: \`$IMAGE\`
+            - **Commit**: <$COMMIT_URL>"
+          else
+            MESSAGE="❌ **Deployment Failed!**
+            - **Branch**: \`$BRANCH\`
+            - **Commit**: <$COMMIT_URL>
+            Please check the logs."
+          fi
+
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}" \
+            $WEBHOOK_URL
