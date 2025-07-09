@@ -128,12 +128,13 @@ jobs:
         name: spring-boot-jar-${{ github.sha }}
         path: build/libs/*.jar
         retention-days: 30
-        
-    - name: Publish JAR to GitHub Packages
-      run: ./gradlew publish
-      env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+    # Gradle에서 이 방식으로 배포를 하려면 maven 플러그인이 필요하다 
+    # - name: Publish JAR to GitHub Packages
+    #   run: ./gradlew publish
+    #   env:
+    #     USERNAME: ${{ github.actor }}
+    #     TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Extract metadata for Docker
       id: meta
