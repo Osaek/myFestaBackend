@@ -275,7 +275,7 @@ jobs:
           set -e
           
           # GitHub Container Registry 로그인 (필요시)
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
           # 현재 활성 컨테이너 확인
           if sudo docker ps | grep -q "app-blue.*Up"; then
@@ -336,14 +336,14 @@ jobs:
           
           # Nginx 설정 업데이트 (포트 전환) - Docker 버전
           sudo docker exec nginx-proxy sed -i "s/server host\.docker\.internal:[0-9]*;/server host.docker.internal:$INACTIVE_PORT;/g" /etc/nginx/conf.d/app.conf
-          sudo docker exec nginx-proxy nginx -t && docker exec nginx-proxy nginx -s reload
+          sudo docker exec nginx-proxy nginx -t && sudo docker exec nginx-proxy nginx -s reload
           
           # 이전 활성 컨테이너를 잠시 유지 (롤백용)
           echo "🔄 Traffic switched to $INACTIVE_COLOR"
           echo "💤 Previous $ACTIVE_COLOR container kept for rollback"
           
           # 30초 후 이전 컨테이너 정리 (백그라운드)
-          (sleep 30 && docker stop app-$ACTIVE_COLOR && docker rm app-$ACTIVE_COLOR) &
+          (sleep 30 && sudo docker stop app-$ACTIVE_COLOR && sudo docker rm app-$ACTIVE_COLOR) &
         EOF
         
     - name: Verify deployment
