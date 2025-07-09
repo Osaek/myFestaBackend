@@ -278,7 +278,7 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
           # 현재 활성 컨테이너 확인
-          if docker ps | grep -q "app-blue.*Up"; then
+          if sudo docker ps | grep -q "app-blue.*Up"; then
             ACTIVE_COLOR="blue"
             INACTIVE_COLOR="green"
             ACTIVE_PORT="8080"
@@ -294,14 +294,14 @@ jobs:
           echo "🚀 Deploying to: $INACTIVE_COLOR ($INACTIVE_PORT)"
           
           # 새 이미지 pull
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           
           # 비활성 컨테이너 중지 및 제거
-          docker stop app-$INACTIVE_COLOR || true
-          docker rm app-$INACTIVE_COLOR || true
+          sudo docker stop app-$INACTIVE_COLOR || true
+          sudo docker rm app-$INACTIVE_COLOR || true
           
           # 새 컨테이너 시작 (비활성 포트에)
-          docker run -d \
+          sudo docker run -d \
             --name app-$INACTIVE_COLOR \
             -p $INACTIVE_PORT:8080 \
             -e SPRING_PROFILES_ACTIVE=dev \
@@ -335,8 +335,8 @@ jobs:
           done
           
           # Nginx 설정 업데이트 (포트 전환) - Docker 버전
-          docker exec nginx-proxy sed -i "s/server host\.docker\.internal:[0-9]*;/server host.docker.internal:$INACTIVE_PORT;/g" /etc/nginx/conf.d/app.conf
-          docker exec nginx-proxy nginx -t && docker exec nginx-proxy nginx -s reload
+          sudo docker exec nginx-proxy sed -i "s/server host\.docker\.internal:[0-9]*;/server host.docker.internal:$INACTIVE_PORT;/g" /etc/nginx/conf.d/app.conf
+          sudo docker exec nginx-proxy nginx -t && docker exec nginx-proxy nginx -s reload
           
           # 이전 활성 컨테이너를 잠시 유지 (롤백용)
           echo "🔄 Traffic switched to $INACTIVE_COLOR"
