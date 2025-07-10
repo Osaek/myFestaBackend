@@ -355,11 +355,11 @@ jobs:
         echo "🔍 Verifying deployment..."
         sleep 10  # 배포 안정화 대기
         
-        if curl -f http://${{ env.EC2_HOST }}/actuator/health; then
+        if curl -f http://${{ env.EC2_HOST }}:8080/actuator/health; then
           echo "✅ Deployment successful!"
           
           # 배포 정보 출력
-          echo "📱 Application URL: http://${{ env.EC2_HOST }}"
+          echo "📱 Application URL: http://${{ env.EC2_HOST }}:8080"
           echo "🐳 Docker Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "📦 JAR: ${{ needs.build-and-publish.outputs.jar-name }}"
         else
