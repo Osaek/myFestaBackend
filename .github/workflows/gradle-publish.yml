@@ -304,6 +304,7 @@ jobs:
           # 새 컨테이너 시작 (비활성 포트에)
           sudo docker run -d \
             --name app-$INACTIVE_COLOR \
+            --network app-network \
             -p $INACTIVE_PORT:8080 \
             -e SPRING_PROFILES_ACTIVE=dev \
             -e SERVER_COLOR=$INACTIVE_COLOR \
