@@ -16,6 +16,7 @@ env:
   S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
   KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
   KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+  KAKAO_REDIRECT_URL: ${{ secrets.KAKAO_REDIRECT_URL }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   DB_HOST: ${{ secrets.DB_HOST }}
   DB_NAME: ${{ secrets.DB_NAME }}
@@ -312,6 +313,7 @@ jobs:
             -e S3_BUCKET="${{ env.S3_BUCKET }}" \
             -e KAKAO_CLIENT_ID="${{ env.KAKAO_CLIENT_ID }}" \
             -e KAKAO_CLIENT_SECRET="${{ env.KAKAO_CLIENT_SECRET }}" \
+            -e KAKAO_REDIRECT_URL="${{ env.KAKAO_REDIRECT_URL }}" \
             -e JWT_SECRET="${{ env.JWT_SECRET }}" \
             -e DB_HOST="${{ env.DB_HOST }}" \
             -e DB_NAME="${{ env.DB_NAME }}" \
