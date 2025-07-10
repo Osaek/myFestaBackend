@@ -307,28 +307,28 @@ jobs:
             -p $INACTIVE_PORT:8080 \
             -e SPRING_PROFILES_ACTIVE=dev \
             -e SERVER_COLOR=$INACTIVE_COLOR \
-            -e AWS_REGION=${{ env.AWS_REGION }} \
-            -e S3_BUCKET=${{ env.S3_BUCKET }} \
-            -e KAKAO_CLIENT_ID=${{ env.KAKAO_CLIENT_ID }} \
-            -e KAKAO_CLIENT_SECRET=${{ env.KAKAO_CLIENT_SECRET }} \
-            -e JWT_SECRET=${{ env.JWT_SECRET }} \
-            -e DB_HOST=${{ env.DB_HOST }} \
-            -e DB_NAME=${{ env.DB_NAME }} \
-            -e DB_USERNAME=${{ env.DB_USERNAME }} \
-            -e DB_PASSWORD=${{ env.DB_PASSWORD }} \
-            -e DB_URL=${{ env.DB_URL }} \
+            -e AWS_REGION="${{ env.AWS_REGION }}" \
+            -e S3_BUCKET="${{ env.S3_BUCKET }}" \
+            -e KAKAO_CLIENT_ID="${{ env.KAKAO_CLIENT_ID }}" \
+            -e KAKAO_CLIENT_SECRET="${{ env.KAKAO_CLIENT_SECRET }}" \
+            -e JWT_SECRET="${{ env.JWT_SECRET }}" \
+            -e DB_HOST="${{ env.DB_HOST }}" \
+            -e DB_NAME="${{ env.DB_NAME }}" \
+            -e DB_USERNAME="${{ env.DB_USERNAME }}" \
+            -e DB_PASSWORD="${{ env.DB_PASSWORD }}" \
+            -e DB_URL="${{ env.DB_URL }}" \
             -e SERVER_URL=http://${{ env.EC2_HOST }} \
             --restart unless-stopped \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           
           # 헬스체크 대기
           echo "⏳ Waiting for health check..."
-          for i in {1..360}; do
+          for i in {1..30}; do
             if curl -f http://localhost:$INACTIVE_PORT/actuator/health > /dev/null 2>&1; then
               echo "✅ Health check passed!"
               break
             fi
-            if [ $i -eq 360 ]; then
+            if [ $i -eq 30 ]; then
               echo "❌ Health check failed!"
               exit 1
             fi
