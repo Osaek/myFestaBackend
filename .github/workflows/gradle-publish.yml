@@ -21,6 +21,7 @@ env:
   DB_NAME: ${{ secrets.DB_NAME }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_URL: ${{ secrets.DB_URL }}
 
 jobs:
   test:
@@ -315,6 +316,7 @@ jobs:
             -e DB_NAME=${{ env.DB_NAME }} \
             -e DB_USERNAME=${{ env.DB_USERNAME }} \
             -e DB_PASSWORD=${{ env.DB_PASSWORD }} \
+            -e DB_URL=${{ env.DB_URL }} \
             -e SERVER_URL=http://${{ env.EC2_HOST }} \
             --restart unless-stopped \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
