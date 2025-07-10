@@ -23,6 +23,7 @@ env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   DB_URL: ${{ secrets.DB_URL }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
 jobs:
   test:
@@ -458,7 +459,7 @@ jobs:
           APP_URL="http://${{ env.EC2_HOST }}"
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           BRANCH="${{ github.ref_name }}"
-          WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
+          WEBHOOK_URL="${{ env.DISCORD_WEBHOOK_URL }}"
           MESSAGE=""
 
           if [ "$STATUS" = "success" ]; then
