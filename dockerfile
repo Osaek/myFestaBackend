@@ -8,5 +8,5 @@ RUN apk add --no-cache tzdata && \
 WORKDIR /app
 COPY build/libs/*.jar app.jar
 EXPOSE 8080
-ENV JAVA_OPTS="-Xms128m -Xmx300m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m"
+ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -XX:+UseG1GC -XX:+UseStringDeduplication"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
