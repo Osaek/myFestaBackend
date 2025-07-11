@@ -10,10 +10,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "Kakao OAuth API", description = "카카오 OAuth 관련 API (KakaoController)")
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoController {
 
 	private final KakaoApiService kakaoApiService;
@@ -21,26 +23,26 @@ public class KakaoController {
 	@Operation(
 		summary = "카카오 로그인 URL 리다이렉트",
 		description = "카카오 OAuth 인증을 위한 로그인 URL로 리다이렉트합니다. 사용자는 해당 URL을 통해 카카오 로그인 인증을 수행하게 됩니다.",
-		// 아래는 예시
 		responses = {
 			@ApiResponse(responseCode = "302", description = "카카오 로그인 URL로 리다이렉트"),
 			@ApiResponse(responseCode = "500", description = "카카오 로그인 URL 생성 실패")
 		}
 	)
-	@GetMapping("/kakao/login-url")
+	@GetMapping("/user/oauth/kakao")
 	public String redirectToKakao() {
 		String kakaoLoginUrl = kakaoApiService.generateKakaoLoginUrl();
 		return "redirect:" + kakaoLoginUrl;
 	}
 
+	//TODO : return 후 메인 페이지로 이동시킬 페이지 추가 필요
 	@Operation(
 		summary = "카카오 로그인 콜백",
 		description = "카카오 인증 서버로부터 인가 코드(code)를 수신한 뒤, 로그인 처리를 수행합니다."
 	)
 	@GetMapping("/login/oauth2/code/kakao")
-	public String kakaoCallback(@RequestParam("code") String code) throws Exception {
+	public String kakaoCallback(@RequestParam("code") String code) {
 		String result = kakaoApiService.kakaoLoginProcess(code);
-		System.out.println(result);
-		return "redirect:/"; //여기에 나중에 우리 이동할 페이지 넣기
+		log.info("카카오 로그인 처리 결과: {}", result);
+		return "redirect:/"; // TODO: 성공 후 이동할 URL 확정
 	}
 }
