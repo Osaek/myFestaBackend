@@ -427,19 +427,23 @@ jobs:
           echo "🔍 Final nginx status:"
           sudo docker exec nginx-proxy cat /etc/nginx/conf.d/default.conf | grep "server.*$HOST_IP" || echo "❌ No matching server line found"
           
-          # 트래픽 전환 완료 후 이전 컨테이너 정리
+          # 프리티어 메모리 절약: 이전 컨테이너 정지 (삭제 안함)
           if [ "$ACTIVE_COLOR" != "none" ]; then
             echo "🔄 Traffic switched from $ACTIVE_COLOR to $INACTIVE_COLOR"
-            echo "💤 Waiting 30 seconds before cleaning up $ACTIVE_COLOR container..."
+            echo "💾 Stopping $ACTIVE_COLOR container to save memory (Free Tier)"
             
-            # 백그라운드에서 30초 후 이전 컨테이너 정리
-            (
-              sleep 30
-              echo "🧹 Cleaning up old $ACTIVE_COLOR container"
-              sudo docker stop app-$ACTIVE_COLOR || true
-              sudo docker rm app-$ACTIVE_COLOR || true
-              echo "✅ Cleanup completed"
-            ) &
+            # 메모리 절약을 위해 이전 컨테이너 정지 (삭제 안함)
+            sudo docker stop app-$ACTIVE_COLOR
+            
+            echo "✅ $ACTIVE_COLOR container stopped (memory freed)"
+            echo ""
+            echo "🔄 Fast rollback command (if needed):"
+            echo "sudo docker start app-$ACTIVE_COLOR"
+            echo "sudo docker exec nginx-proxy sed -i 's/:$INACTIVE_PORT/:$ACTIVE_PORT/g' /etc/nginx/conf.d/default.conf"
+            echo "sudo docker exec nginx-proxy nginx -s reload"
+            echo ""
+            echo "🧹 Complete cleanup (when stable):"
+            echo "sudo docker rm app-$ACTIVE_COLOR"
           else
             echo "🎉 First deployment completed successfully!"
           fi
@@ -552,31 +556,37 @@ jobs:
   discord-notification:
     needs: [deploy-blue-green]
     runs-on: ubuntu-latest
-    if: always()
-
+    if: always()  # 성공/실패 상관없이 실행
     steps:
-      - name: Send Discord Notification
-        run: |
-          STATUS="${{ needs.deploy-blue-green.result }}"
-          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
-          APP_URL="http://${{ env.EC2_HOST }}"
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-          BRANCH="${{ github.ref_name }}"
-          WEBHOOK_URL="${{ env.DISCORD_WEBHOOK_URL }}"
-
-          if [ "$STATUS" = "success" ]; then
-            MESSAGE="✅ **Deployment Successful!**
-            - **Branch**: \`$BRANCH\`
-            - **App**: <$APP_URL>
-            - **Docker**: \`$IMAGE\`
-            - **Commit**: <$COMMIT_URL>"
-          else
-            MESSAGE="❌ **Deployment Failed!**
-            - **Branch**: \`$BRANCH\`
-            - **Commit**: <$COMMIT_URL>
-            Please check the logs."
-          fi
-
-          curl -X POST -H "Content-Type: application/json" \
-            -d "{\"content\": \"$MESSAGE\"}" \
-            "$WEBHOOK_URL"
+    - name: Set notification message
+      id: message
+      run: |
+        STATUS="${{ needs.deploy-blue-green.result }}"
+        COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+        APP_URL="http://${{ env.EC2_HOST }}"
+        IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        BRANCH="${{ github.ref_name }}"
+        
+        if [ "$STATUS" = "success" ]; then
+          MESSAGE="✅ **Deployment Successful!**
+        - **Branch**: \`$BRANCH\`
+        - **App**: <$APP_URL>
+        - **Docker**: \`$IMAGE\`
+        - **Commit**: <$COMMIT_URL>"
+        else
+          MESSAGE="❌ **Deployment Failed!**
+        - **Branch**: \`$BRANCH\`
+        - **Commit**: <$COMMIT_URL>
+        Please check the logs."
+        fi
+        
+        # 멀티라인 메시지를 output으로 설정
+        echo "content<<EOF" >> $GITHUB_OUTPUT
+        echo "$MESSAGE" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Discord Webhook Action
+      uses: tsickert/discord-webhook@v7.0.0
+      with:
+        webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
+        content: ${{ steps.message.outputs.content }}
