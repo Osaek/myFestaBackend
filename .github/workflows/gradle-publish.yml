@@ -566,28 +566,32 @@ jobs:
 
     steps:
       - name: Send Discord Notification
-        run: |
-          STATUS="${{ needs.deploy-blue-green.result }}"
-          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
-          APP_URL="http://${{ env.EC2_HOST }}"
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-          BRANCH="${{ github.ref_name }}"
-          WEBHOOK_URL="${{ env.DISCORD_WEBHOOK_URL }}"
-          MESSAGE=""
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+        webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
+        content: "Test"
+        # run: |
+        #   STATUS="${{ needs.deploy-blue-green.result }}"
+        #   COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+        #   APP_URL="http://${{ env.EC2_HOST }}"
+        #   IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        #   BRANCH="${{ github.ref_name }}"
+        #   WEBHOOK_URL="${{ env.DISCORD_WEBHOOK_URL }}"
+        #   MESSAGE=""
 
-          if [ "$STATUS" = "success" ]; then
-            MESSAGE="✅ **Deployment Successful!**
-            - **Branch**: \`$BRANCH\`
-            - **App**: <$APP_URL>
-            - **Docker**: \`$IMAGE\`
-            - **Commit**: <$COMMIT_URL>"
-          else
-            MESSAGE="❌ **Deployment Failed!**
-            - **Branch**: \`$BRANCH\`
-            - **Commit**: <$COMMIT_URL>
-            Please check the logs."
-          fi
+        #   if [ "$STATUS" = "success" ]; then
+        #     MESSAGE="✅ **Deployment Successful!**
+        #     - **Branch**: \`$BRANCH\`
+        #     - **App**: <$APP_URL>
+        #     - **Docker**: \`$IMAGE\`
+        #     - **Commit**: <$COMMIT_URL>"
+        #   else
+        #     MESSAGE="❌ **Deployment Failed!**
+        #     - **Branch**: \`$BRANCH\`
+        #     - **Commit**: <$COMMIT_URL>
+        #     Please check the logs."
+        #   fi
 
-          curl -X POST -H "Content-Type: application/json" \
-            -d "{\"content\": \"$MESSAGE\"}" \
-            $WEBHOOK_URL
+        #   curl -X POST -H "Content-Type: application/json" \
+        #     -d "{\"content\": \"$MESSAGE\"}" \
+        #     $WEBHOOK_URL
