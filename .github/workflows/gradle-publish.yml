@@ -381,30 +381,51 @@ jobs:
             sleep 5
           done
           
-          # Nginx 설정 업데이트 (IP 주소 사용)
+          # Nginx 설정 업데이트 (IP 주소 사용) - 디버깅 강화
           echo "🔄 Updating Nginx configuration..."
           
           # EC2 내부 IP 주소 사용
           HOST_IP=$(hostname -I | awk '{print $1}')
           echo "🌐 Host IP: $HOST_IP"
           
-          # host.docker.internal을 IP로 변경하고 포트 업데이트
-          sudo docker exec nginx-proxy sed -i "s/host\.docker\.internal/$HOST_IP/g" /etc/nginx/conf.d/default.conf
-          sudo docker exec nginx-proxy sed -i "s/$HOST_IP:[0-9]*/$HOST_IP:$INACTIVE_PORT/g" /etc/nginx/conf.d/default.conf
+          # 현재 설정 확인
+          echo "📋 Current nginx config:"
+          sudo docker exec nginx-proxy cat /etc/nginx/conf.d/default.conf | grep -A2 -B2 "server.*:" || echo "No server lines found"
           
-          # 설정 확인
-          echo "📋 Updated upstream:"
-          sudo docker exec nginx-proxy cat /etc/nginx/conf.d/default.conf | grep "server.*$HOST_IP"
+          # host.docker.internal을 IP로 변경하고 포트 업데이트
+          echo "🔧 Updating host.docker.internal to IP..."
+          sudo docker exec nginx-proxy sed -i "s/host\.docker\.internal/$HOST_IP/g" /etc/nginx/conf.d/default.conf || echo "No host.docker.internal found"
+          
+          echo "🔧 Updating port to $INACTIVE_PORT..."
+          sudo docker exec nginx-proxy sed -i "s/$HOST_IP:[0-9]*/$HOST_IP:$INACTIVE_PORT/g" /etc/nginx/conf.d/default.conf || echo "Port update failed"
+          
+          # 변경 후 설정 확인
+          echo "📋 Updated nginx config:"
+          sudo docker exec nginx-proxy cat /etc/nginx/conf.d/default.conf | grep -A2 -B2 "server.*:" || echo "No server lines found after update"
           
           # Nginx 테스트 및 재로드
+          echo "🧪 Testing nginx configuration..."
           if sudo docker exec nginx-proxy nginx -t; then
-            sudo docker exec nginx-proxy nginx -s reload
-            echo "✅ Nginx updated: $HOST_IP:$INACTIVE_PORT"
+            echo "✅ Nginx config test passed"
+            if sudo docker exec nginx-proxy nginx -s reload; then
+              echo "✅ Nginx reloaded successfully: $HOST_IP:$INACTIVE_PORT"
+            else
+              echo "⚠️ Nginx reload failed, trying restart..."
+              sudo docker restart nginx-proxy
+              sleep 5
+              echo "🔄 Nginx restarted"
+            fi
           else
-            echo "❌ Nginx config error, restarting..."
+            echo "❌ Nginx config test failed, showing config:"
+            sudo docker exec nginx-proxy cat /etc/nginx/conf.d/default.conf
+            echo "🔄 Restarting nginx anyway..."
             sudo docker restart nginx-proxy
             sleep 5
           fi
+          
+          # 최종 확인
+          echo "🔍 Final nginx status:"
+          sudo docker exec nginx-proxy cat /etc/nginx/conf.d/default.conf | grep "server.*$HOST_IP" || echo "❌ No matching server line found"
           
           # 트래픽 전환 완료 후 이전 컨테이너 정리
           if [ "$ACTIVE_COLOR" != "none" ]; then
@@ -531,37 +552,31 @@ jobs:
   discord-notification:
     needs: [deploy-blue-green]
     runs-on: ubuntu-latest
-    if: always()  # 성공/실패 상관없이 실행
+    if: always()
+
     steps:
-    - name: Set notification message
-      id: message
-      run: |
-        STATUS="${{ needs.deploy-blue-green.result }}"
-        COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
-        APP_URL="http://${{ env.EC2_HOST }}"
-        IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-        BRANCH="${{ github.ref_name }}"
-        
-        if [ "$STATUS" = "success" ]; then
-          MESSAGE="✅ **Deployment Successful!**
-        - **Branch**: \`$BRANCH\`
-        - **App**: <$APP_URL>
-        - **Docker**: \`$IMAGE\`
-        - **Commit**: <$COMMIT_URL>"
-        else
-          MESSAGE="❌ **Deployment Failed!**
-        - **Branch**: \`$BRANCH\`
-        - **Commit**: <$COMMIT_URL>
-        Please check the logs."
-        fi
-        
-        # 멀티라인 메시지를 output으로 설정
-        echo "content<<EOF" >> $GITHUB_OUTPUT
-        echo "$MESSAGE" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-    
-    - name: Discord Webhook Action
-      uses: tsickert/discord-webhook@v7.0.0
-      with:
-        webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
-        content: ${{ steps.message.outputs.content }}
+      - name: Send Discord Notification
+        run: |
+          STATUS="${{ needs.deploy-blue-green.result }}"
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+          APP_URL="http://${{ env.EC2_HOST }}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          BRANCH="${{ github.ref_name }}"
+          WEBHOOK_URL="${{ env.DISCORD_WEBHOOK_URL }}"
+
+          if [ "$STATUS" = "success" ]; then
+            MESSAGE="✅ **Deployment Successful!**
+            - **Branch**: \`$BRANCH\`
+            - **App**: <$APP_URL>
+            - **Docker**: \`$IMAGE\`
+            - **Commit**: <$COMMIT_URL>"
+          else
+            MESSAGE="❌ **Deployment Failed!**
+            - **Branch**: \`$BRANCH\`
+            - **Commit**: <$COMMIT_URL>
+            Please check the logs."
+          fi
+
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}" \
+            "$WEBHOOK_URL"
