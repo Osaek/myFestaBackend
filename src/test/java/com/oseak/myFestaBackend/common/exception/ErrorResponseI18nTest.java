@@ -13,6 +13,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import com.oseak.myFestaBackend.common.exception.util.MessageUtil;
 
 @SpringBootTest
+@ActiveProfiles("test")  // 테스트 프로파일 활성화
 class ErrorResponseI18nTest {
 
 	@Autowired
