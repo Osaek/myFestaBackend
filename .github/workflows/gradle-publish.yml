@@ -8,6 +8,14 @@ on:
   release:
     types: [created]
 
+# 워크플로우 레벨에서 권한 설정 추가
+permissions:
+  contents: read
+  packages: write
+  actions: read
+  checks: write  # test-reporter를 위한 권한 추가
+  pull-requests: write  # PR 코멘트를 위한 권한 추가
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: osaek/myfestabackend
@@ -28,6 +36,12 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    # 각 잡에도 필요한 권한 명시
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     
     steps:
     - name: Checkout code
@@ -52,19 +66,18 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 테스트는 없이 일단 배포 되는지 확인하기
-    # - name: Build with Gradle
-    #   run: ./gradlew build -x test  
     - name: Run tests
       run: ./gradlew test
       
+    # test-reporter 버전을 최신으로 업데이트하고 GITHUB_TOKEN 명시
     - name: Generate test report
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v1.9.1
       if: success() || failure()
       with:
         name: Gradle Tests
         path: build/test-results/test/*.xml
         reporter: java-junit
+        token: ${{ secrets.GITHUB_TOKEN }}  # 토큰 명시적으로 전달
         
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -131,13 +144,6 @@ jobs:
         name: spring-boot-jar-${{ github.sha }}
         path: build/libs/*.jar
         retention-days: 30
-  
-    # Gradle에서 이 방식으로 배포를 하려면 maven 플러그인이 필요하다 
-    # - name: Publish JAR to GitHub Packages
-    #   run: ./gradlew publish
-    #   env:
-    #     USERNAME: ${{ github.actor }}
-    #     TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Extract metadata for Docker
       id: meta
@@ -373,6 +379,11 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     
+    # PR 코멘트를 위한 권한 추가
+    permissions:
+      contents: read
+      pull-requests: write
+    
     steps:
     - name: Create deployment summary
       run: |
@@ -413,6 +424,7 @@ jobs:
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v7
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}  # 토큰 명시적으로 전달
         script: |
           const deployResult = "${{ needs.deploy-blue-green.result }}";
           const isSuccess = deployResult === "success";
