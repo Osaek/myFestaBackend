@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import com.oseak.myFestaBackend.common.exception.util.MessageUtil;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")  // 테스트 프로파일 활성화
