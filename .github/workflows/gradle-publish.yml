@@ -53,26 +53,26 @@ jobs:
       run: chmod +x gradlew
 
     # 테스트는 없이 일단 배포 되는지 확인하기
-    - name: Build with Gradle
-      run: ./gradlew build -x test  
-    # - name: Run tests
-    #   run: ./gradlew test
+    # - name: Build with Gradle
+    #   run: ./gradlew build -x test  
+    - name: Run tests
+      run: ./gradlew test
       
-    # - name: Generate test report
-    #   uses: dorny/test-reporter@v1
-    #   if: success() || failure()
-    #   with:
-    #     name: Gradle Tests
-    #     path: build/test-results/test/*.xml
-    #     reporter: java-junit
+    - name: Generate test report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Gradle Tests
+        path: build/test-results/test/*.xml
+        reporter: java-junit
         
-    # - name: Upload test results
-    #   uses: actions/upload-artifact@v4
-    #   if: always()
-    #   with:
-    #     name: test-results-${{ github.sha }}
-    #     path: build/test-results/test/*.xml
-    #     retention-days: 7
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ github.sha }}
+        path: build/test-results/test/*.xml
+        retention-days: 7
 
   build-and-publish:
     needs: test
