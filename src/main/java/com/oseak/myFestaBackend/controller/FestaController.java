@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/festival")
 public class FestaController {
 
+	//TODO : 추후 컨트롤러 삭제 후 배치파일로 메소드 작동할 예정
 	private final FestaService festaService;
 
 	@GetMapping("/fetch")
