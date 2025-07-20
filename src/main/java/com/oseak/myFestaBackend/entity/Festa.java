@@ -27,6 +27,9 @@ public class Festa {
 	@Column(name = "festa_id")
 	private Long festaId;
 
+	@Column(unique = true)
+	private Long contentId;
+
 	@Column(name = "festa_name", nullable = false)
 	private String festaName;
 
@@ -76,10 +79,11 @@ public class Festa {
 	private LocalDateTime updatedAt;
 
 	@Builder
-	public Festa(String festaName, Double latitude, Double longitude, String festaAddress,
+	public Festa(Long contentId, String festaName, Double latitude, Double longitude, String festaAddress,
 		LocalDateTime festaStartAt, LocalDateTime festaEndAt, Integer areaCode, Integer subAreaCode,
 		String overview, String description, String imageUrl, String openTime, String feeInfo,
 		String festaStatus) {
+		this.contentId = contentId;
 		this.festaName = festaName;
 		this.latitude = latitude;
 		this.longitude = longitude;
