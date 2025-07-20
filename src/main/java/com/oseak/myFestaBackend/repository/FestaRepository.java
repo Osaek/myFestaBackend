@@ -9,6 +9,9 @@ import com.oseak.myFestaBackend.entity.Festa;
 
 public interface FestaRepository extends JpaRepository<Festa, Long> {
 	Optional<Festa> findByFestaName(String festaName);
+
 	Optional<Festa> findByFestaNameAndFestaStartAt(String festaName, LocalDateTime festaStartAt);
+
+	Optional<Festa> findByContentId(Long contentId);
 
 }
