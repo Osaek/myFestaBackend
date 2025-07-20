@@ -18,6 +18,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.entity.Festa;
@@ -33,6 +35,7 @@ public class FestaService {
 
 	private final FestaRepository festaRepository;
 	private final WebClient webClient;
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Value("${tourapi.url}")
 	private String baseUrl;
@@ -143,9 +146,11 @@ public class FestaService {
 			if (infos != null) {
 				for (int i = 0; i < infos.length(); i++) {
 					JSONObject info = infos.getJSONObject(i);
-					String name = info.optString("infoname");
-					String text = info.optString("infotext");
-
+					Map<String, String> parsed = objectMapper.readValue(info.toString(),
+						new TypeReference<Map<String, String>>() {
+						});
+					String name = parsed.get("infoname");
+					String text = parsed.get("infotext");
 					if ("행사소개".equals(name))
 						result.put("overview", text);
 					else if ("행사내용".equals(name))
