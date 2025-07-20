@@ -147,14 +147,15 @@ public class FestaService {
 				for (int i = 0; i < infos.length(); i++) {
 					JSONObject info = infos.getJSONObject(i);
 					Map<String, String> parsed = objectMapper.readValue(info.toString(),
-						new TypeReference<Map<String, String>>() {
+						new TypeReference<>() {
 						});
 					String name = parsed.get("infoname");
 					String text = parsed.get("infotext");
-					if ("행사소개".equals(name))
+					if ("행사소개".equals(name)) {
 						result.put("overview", text);
-					else if ("행사내용".equals(name))
+					} else if ("행사내용".equals(name)) {
 						result.put("description", text);
+					}
 				}
 			}
 		} catch (WebClientResponseException e) {
@@ -175,8 +176,9 @@ public class FestaService {
 
 	private String getStatusByDate(LocalDateTime start, LocalDateTime end) {
 		LocalDate today = LocalDate.now();
-		if (start == null || end == null)
+		if (start == null || end == null) {
 			return "false";
+		}
 		return (!today.isBefore(start.toLocalDate()) && !today.isAfter(end.toLocalDate())) ? "true" : "false";
 	}
 }
