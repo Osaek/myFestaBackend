@@ -7,4 +7,5 @@ import com.oseak.myFestaBackend.entity.Region;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Long> {
+
 }

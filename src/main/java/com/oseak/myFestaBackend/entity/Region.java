@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Region {
-
 	@Id
 	@Column(name = "region_code")
 	private Integer regionCode;
