@@ -25,6 +25,7 @@ import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -85,14 +86,17 @@ public class FestaService {
 				String status = getStatusByDate(startAt, endAt);
 				Map<String, String> detailMap = fetchFestivalDetails(contentId, contentTypeId);
 
-				Optional<Festa> optionalFesta = festaRepository.findByFestaNameAndFestaStartAt(title, startAt);
+				Optional<Festa> optionalFesta = festaRepository.findByContentId(contentId);
 				if (optionalFesta.isPresent()) {
+					log.info("기존 '{}' 행사 (contentId: {}) 업데이트 실행", title, contentId);
 					Festa festa = optionalFesta.get();
 					festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
 					festa.updateStatus(status);
 					festaRepository.save(festa);
 				} else {
+					log.info("신규 '{}' 행사 (contentId: {}) 저장 실행", title, contentId);
 					Festa festa = Festa.builder()
+						.contentId(contentId)
 						.festaName(title)
 						.latitude(item.optDouble("mapy"))
 						.longitude(item.optDouble("mapx"))
@@ -181,4 +185,36 @@ public class FestaService {
 		}
 		return (!today.isBefore(start.toLocalDate()) && !today.isAfter(end.toLocalDate())) ? "true" : "false";
 	}
+
+	@Transactional
+	public void updateAllFestaStatus() {
+		LocalDate today = LocalDate.now();
+
+		festaRepository.findAll().forEach(festa -> {
+			LocalDate start = null;
+			if (festa.getFestaStartAt() != null) {
+				start = festa.getFestaStartAt().toLocalDate();
+			}
+
+			LocalDate end = null;
+			if (festa.getFestaEndAt() != null) {
+				end = festa.getFestaEndAt().toLocalDate();
+			}
+			String status = "false";
+			if (start != null && end != null &&
+				!today.isBefore(start) && !today.isAfter(end)) {
+				status = "true";
+			}
+			if (!status.equals(festa.getFestaStatus())) {
+				festa.updateStatus(status);
+			}
+		});
+
+		log.info("축제 진행상태 업데이트 완료");
+	}
+
+	/*TODO : festa 정보 저장될 때 festa_statistic도 같이 만들어줘야함.
+		user_like좀 넣고 festa_statistic 도 넣고 해야 추천 API만들 듯.
+		status enum처리해서 예정, 진행중, 완료 상태 넣을 예정
+	*/
 }
