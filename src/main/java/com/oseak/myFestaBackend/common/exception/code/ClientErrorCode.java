@@ -35,7 +35,19 @@ public enum ClientErrorCode implements BaseErrorCode {
 	AUTH_ACCOUNT_WITHDRAWN(HttpStatus.FORBIDDEN, "OSAEK-10007", "auth.account.withdrawn"),
 
 	// 권한 관련
-	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized");
+	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized"),
+
+	// jwt 토큰 관련
+	JWT_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10010", "jwt.refresh_token.invalid"),
+	JWT_TOKEN_RETIRED(HttpStatus.UNAUTHORIZED, "OSAEK-10011", "jwt.token.retired"),
+	JWT_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10012", "jwt.token.invalid"),
+	JWT_TOKEN_SIGN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10013", "jwt.token.sign_invalid"),
+	JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10014", "jwt.token.not_found"),
+
+	// 패스워드 관련
+	PASSWORD_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10015", "password.not_found"),
+	PASSWORD_NOT_CORRECT(HttpStatus.UNAUTHORIZED, "OSAEK-10016", "password.not_correct"),
+	;
 
 	private final HttpStatus httpStatus;
 	private final String code;
