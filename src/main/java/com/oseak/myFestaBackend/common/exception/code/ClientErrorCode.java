@@ -27,7 +27,8 @@ public enum ClientErrorCode implements BaseErrorCode {
 
 	// 회원가입/중복 관련
 	USER_EMAIL_DUPLICATE(HttpStatus.CONFLICT, "OSAEK-10003", "user.email.duplicate"),
-	USER_NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "OSAEK-10004", "user.nickname.duplicate"),
+	USER_NICKNAME_GENERATION_ATTEMPT_EXCEEDED(HttpStatus.CONFLICT, "OSAEK-10004",
+		"user.nickname.generation_attempt_exceeded"),
 
 	// 로그인 관련
 	AUTH_CREDENTIALS_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10005", "auth.credentials.invalid"),
