@@ -18,8 +18,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
-import com.oseak.myFestaBackend.domain.Member;
-import com.oseak.myFestaBackend.domain.MemberOauthToken;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.MemberOauthToken;
 import com.oseak.myFestaBackend.repository.MemberOauthTokenRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
