@@ -6,6 +6,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.oseak.myFestaBackend.entity.enums.Provider;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -64,7 +66,4 @@ public class Member {
 		this.profile = profile;
 	}
 
-	public enum Provider {
-		local, kakao
-	}
 }
