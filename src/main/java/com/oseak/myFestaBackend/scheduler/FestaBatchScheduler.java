@@ -23,7 +23,7 @@ public class FestaBatchScheduler {
 	private final RegionRepository regionRepository;
 
 	//TODO : 시간 변경필요
-	@Scheduled(cron = "0 10 1 * * *")
+	@Scheduled(cron = "0 1 0 * * *")
 	public void fetchAndSaveFestivalsBatch() {
 		log.info("축제 정보 수집 배치 정상 시작");
 		String eventStartDate = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
@@ -40,7 +40,7 @@ public class FestaBatchScheduler {
 		log.info("축제 정보 수집 완료");
 	}
 
-	@Scheduled(cron = "0 20 1 * * *")
+	@Scheduled(cron = "0 10 0 * * *")
 	public void updateFestaStatusBatch() {
 		log.info("축제 상태 업데이트 시작");
 		try {
