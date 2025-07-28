@@ -10,26 +10,25 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CreateUserRequestDto {
-
-	// TODO: message를 다국어 처리
+	
 	@Pattern(
 		regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-		message = "올바른 이메일 형식이 아닙니다."
+		message = "{validation.email.pattern}"
 	)
-	@NotBlank(message = "이메일은 필수입니다.")
-	@Size(max = 256, message = "이메일은 최대 {max}를 넘을 수 없습니다.")
+	@NotBlank(message = "{validation.email.required}")
+	@Size(max = 256, message = "{validation.email.size}")
 	private String email;
 
 	private String nickname;
 
-	@NotBlank(message = "패스워드는 필수입니다.")
-	@Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
+	@NotBlank(message = "{validation.password.required}")
+	@Size(min = 8, message = "{validation.password.size}")
 	private String password;
 
-	@NotBlank(message = "패스워드 확인은 필수입니다.")
+	@NotBlank(message = "{validation.password.confirm.required}")
 	private String passwordConfirm;
 
-	@AssertTrue(message = "비밀번호가 일치하지 않습니다.")
+	@AssertTrue(message = "{validation.password.mismatch}")
 	public boolean isPasswordValid() {
 		return password != null && password.equals(passwordConfirm);
 	}

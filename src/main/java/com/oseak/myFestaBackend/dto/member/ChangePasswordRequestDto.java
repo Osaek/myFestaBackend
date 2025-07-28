@@ -10,24 +10,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChangePasswordRequestDto {
 
-	@NotBlank(message = "패스워드는 필수입니다.")
-	@Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
+	@NotBlank(message = "{validation.password.required}")
+	@Size(min = 8, message = "{validation.password.size}")
 	private String currentPassword;
 
-	@NotBlank(message = "패스워드는 필수입니다.")
-	@Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
+	@NotBlank(message = "{validation.password.required}")
+	@Size(min = 8, message = "{validation.password.size}")
 	private String newPassword;
 
-	@NotBlank(message = "패스워드는 필수입니다.")
-	@Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
+	@NotBlank(message = "{validation.password.required}")
+	@Size(min = 8, message = "{validation.password.size}")
 	private String confirmPassword;
 
-	@AssertTrue(message = "비밀번호가 일치하지 않습니다.")
+	@AssertTrue(message = "{validation.password.mismatch}")
 	public boolean isPasswordValid() {
 		return newPassword != null && newPassword.equals(confirmPassword);
 	}
 
-	@AssertTrue(message = "비밀번호가 이전 비밀번호와 동일합니다.")
+	@AssertTrue(message = "{validation.password.same}")
 	public boolean isDiffPasswordValid() {
 		return !currentPassword.equals(newPassword);
 	}

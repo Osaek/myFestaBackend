@@ -33,6 +33,7 @@ public enum ClientErrorCode implements BaseErrorCode {
 	AUTH_CREDENTIALS_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10005", "auth.credentials.invalid"),
 	AUTH_ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "OSAEK-10006", "auth.account.disabled"),
 	AUTH_ACCOUNT_WITHDRAWN(HttpStatus.FORBIDDEN, "OSAEK-10007", "auth.account.withdrawn"),
+	AUTH_LOGIN_METHOD_INVALID(HttpStatus.FORBIDDEN, "OSAEK-10007", "auth.login.method.invalid"),
 
 	// 권한 관련
 	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized"),
