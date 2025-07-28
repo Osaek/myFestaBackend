@@ -33,10 +33,14 @@ public class MemberDetailsService implements UserDetailsService {
 		Member member = memberRepository.findByEmailAndIsWithdrawnIsFalse(email)
 			.orElseThrow(() -> new OsaekException(USER_EMAIL_NOT_FOUND));
 
-		MemberPassword memberPassword = memberPasswordRepository.findByMemberId(member.getId())
-			.orElse(null);
+		if (member.getProvider() == Member.Provider.local) {
+			MemberPassword memberPassword = memberPasswordRepository.findByMemberId(member.getId())
+				.orElseThrow(() -> new OsaekException(PASSWORD_NOT_FOUND));
 
-		return new CustomUserDetails(member, memberPassword);
+			return new CustomUserDetails(member, memberPassword);
+		}
+
+		return new CustomUserDetails(member, null);
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)

@@ -40,6 +40,10 @@ public class AuthService {
 		CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 		Member member = userDetails.getMember();
 
+		if (member.getProvider() != Member.Provider.local) {
+			throw new OsaekException(AUTH_LOGIN_METHOD_INVALID);
+		}
+
 		String accessToken = jwtUtil.generateAccessToken(member);
 		String refreshToken = jwtUtil.generateRefreshToken(member);
 
