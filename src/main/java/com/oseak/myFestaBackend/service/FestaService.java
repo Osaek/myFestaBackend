@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.entity.Festa;
+import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 
 import jakarta.transaction.Transactional;
@@ -83,7 +84,7 @@ public class FestaService {
 				Long contentId = item.optLong("contentid");
 				Long contentTypeId = item.optLong("contenttypeid");
 
-				String status = getStatusByDate(startAt, endAt);
+				FestaStatus status = getStatusByDate(startAt, endAt);
 				Map<String, String> detailMap = fetchFestivalDetails(contentId, contentTypeId);
 
 				Optional<Festa> optionalFesta = festaRepository.findByContentId(contentId);
@@ -178,12 +179,18 @@ public class FestaService {
 		}
 	}
 
-	private String getStatusByDate(LocalDateTime start, LocalDateTime end) {
+	private FestaStatus getStatusByDate(LocalDateTime start, LocalDateTime end) {
 		LocalDate today = LocalDate.now();
 		if (start == null || end == null) {
-			return "false";
+			return FestaStatus.SCHEDULED;
 		}
-		return (!today.isBefore(start.toLocalDate()) && !today.isAfter(end.toLocalDate())) ? "true" : "false";
+		if (today.isBefore(start.toLocalDate())) {
+			return FestaStatus.SCHEDULED;
+		} else if (!today.isAfter(end.toLocalDate())) {
+			return FestaStatus.ONGOING;
+		} else {
+			return FestaStatus.COMPLETED;
+		}
 	}
 
 	@Transactional
@@ -191,22 +198,23 @@ public class FestaService {
 		LocalDate today = LocalDate.now();
 
 		festaRepository.findAll().forEach(festa -> {
-			LocalDate start = null;
-			if (festa.getFestaStartAt() != null) {
-				start = festa.getFestaStartAt().toLocalDate();
+			LocalDate start = festa.getFestaStartAt() != null ? festa.getFestaStartAt().toLocalDate() : null;
+			LocalDate end = festa.getFestaEndAt() != null ? festa.getFestaEndAt().toLocalDate() : null;
+
+			FestaStatus newStatus;
+
+			if (start == null || end == null) {
+				newStatus = FestaStatus.SCHEDULED; // 기본값 또는 예외 처리 가능
+			} else if (today.isBefore(start)) {
+				newStatus = FestaStatus.SCHEDULED;
+			} else if (!today.isAfter(end)) {
+				newStatus = FestaStatus.ONGOING;
+			} else {
+				newStatus = FestaStatus.COMPLETED;
 			}
 
-			LocalDate end = null;
-			if (festa.getFestaEndAt() != null) {
-				end = festa.getFestaEndAt().toLocalDate();
-			}
-			String status = "false";
-			if (start != null && end != null &&
-				!today.isBefore(start) && !today.isAfter(end)) {
-				status = "true";
-			}
-			if (!status.equals(festa.getFestaStatus())) {
-				festa.updateStatus(status);
+			if (festa.getFestaStatus() != newStatus) {
+				festa.updateStatus(newStatus);
 			}
 		});
 
@@ -215,6 +223,5 @@ public class FestaService {
 
 	/*TODO : festa 정보 저장될 때 festa_statistic도 같이 만들어줘야함.
 		user_like좀 넣고 festa_statistic 도 넣고 해야 추천 API만들 듯.
-		status enum처리해서 예정, 진행중, 완료 상태 넣을 예정
 	*/
 }
