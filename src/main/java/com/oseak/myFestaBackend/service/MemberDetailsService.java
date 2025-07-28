@@ -9,9 +9,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
-import com.oseak.myFestaBackend.domain.CustomUserDetails;
-import com.oseak.myFestaBackend.domain.Member;
-import com.oseak.myFestaBackend.domain.MemberPassword;
+import com.oseak.myFestaBackend.entity.CustomUserDetails;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.MemberPassword;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.repository.MemberPasswordRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -33,7 +34,7 @@ public class MemberDetailsService implements UserDetailsService {
 		Member member = memberRepository.findByEmailAndIsWithdrawnIsFalse(email)
 			.orElseThrow(() -> new OsaekException(USER_EMAIL_NOT_FOUND));
 
-		if (member.getProvider() == Member.Provider.local) {
+		if (member.getProvider() == Provider.LOCAL) {
 			MemberPassword memberPassword = memberPasswordRepository.findByMemberId(member.getId())
 				.orElseThrow(() -> new OsaekException(PASSWORD_NOT_FOUND));
 

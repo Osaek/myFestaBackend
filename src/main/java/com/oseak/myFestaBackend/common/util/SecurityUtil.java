@@ -7,8 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
-import com.oseak.myFestaBackend.domain.CustomUserDetails;
-import com.oseak.myFestaBackend.domain.Member;
+import com.oseak.myFestaBackend.entity.CustomUserDetails;
+import com.oseak.myFestaBackend.entity.Member;
 
 @Component
 public class SecurityUtil {

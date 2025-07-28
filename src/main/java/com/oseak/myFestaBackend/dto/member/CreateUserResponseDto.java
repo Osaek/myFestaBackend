@@ -1,6 +1,7 @@
 package com.oseak.myFestaBackend.dto.member;
 
-import com.oseak.myFestaBackend.domain.Member;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ public class CreateUserResponseDto {
 
 	private String email;
 	private String nickname;
-	private Member.Provider provider;
+	private Provider provider;
 
 	public CreateUserResponseDto(Member member) {
 		this.email = member.getEmail();

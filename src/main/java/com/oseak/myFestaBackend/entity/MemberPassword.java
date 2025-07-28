@@ -1,4 +1,4 @@
-package com.oseak.myFestaBackend.domain;
+package com.oseak.myFestaBackend.entity;
 
 import java.time.LocalDateTime;
 

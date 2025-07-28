@@ -14,8 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
-import com.oseak.myFestaBackend.domain.CustomUserDetails;
-import com.oseak.myFestaBackend.domain.Member;
+import com.oseak.myFestaBackend.entity.CustomUserDetails;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -63,8 +64,8 @@ public class JwtUtil {
 	}
 
 	// 토큰에서 제공업체 추출
-	public Member.Provider getProviderFromToken(String token) {
-		return Member.Provider.valueOf(getClaimFromToken(token, claims -> claims.get("provider", String.class)));
+	public Provider getProviderFromToken(String token) {
+		return Provider.valueOf(getClaimFromToken(token, claims -> claims.get("provider", String.class)));
 	}
 
 	// 토큰에서 만료일 추출
@@ -261,7 +262,7 @@ public class JwtUtil {
 		Long memberId = getMemberIdFromToken(refreshToken);
 		String email = getEmailFromToken(refreshToken);
 		String nickname = getNicknameFromToken(refreshToken);
-		Member.Provider provider = getProviderFromToken(refreshToken);
+		Provider provider = getProviderFromToken(refreshToken);
 
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("email", email);

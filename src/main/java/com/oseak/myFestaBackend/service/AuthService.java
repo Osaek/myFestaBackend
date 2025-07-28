@@ -10,12 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.util.JwtUtil;
-import com.oseak.myFestaBackend.domain.CustomUserDetails;
-import com.oseak.myFestaBackend.domain.Member;
 import com.oseak.myFestaBackend.dto.auth.LoginRequestDto;
 import com.oseak.myFestaBackend.dto.auth.LoginResponseDto;
 import com.oseak.myFestaBackend.dto.auth.RefreshTokenRequestDto;
 import com.oseak.myFestaBackend.dto.auth.TokenResponseDto;
+import com.oseak.myFestaBackend.entity.CustomUserDetails;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class AuthService {
 		CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 		Member member = userDetails.getMember();
 
-		if (member.getProvider() != Member.Provider.local) {
+		if (member.getProvider() != Provider.LOCAL) {
 			throw new OsaekException(AUTH_LOGIN_METHOD_INVALID);
 		}
 

@@ -7,13 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
-import com.oseak.myFestaBackend.domain.Member;
-import com.oseak.myFestaBackend.domain.MemberPassword;
 import com.oseak.myFestaBackend.dto.member.ChangePasswordRequestDto;
 import com.oseak.myFestaBackend.dto.member.ChangePasswordResponseDto;
 import com.oseak.myFestaBackend.dto.member.CreateUserRequestDto;
 import com.oseak.myFestaBackend.dto.member.CreateUserResponseDto;
 import com.oseak.myFestaBackend.dto.member.WithdrawMemberResponseDto;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.MemberPassword;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.repository.MemberPasswordRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -40,7 +41,7 @@ public class MemberService {
 		Member member = Member.builder()
 			.email(request.getEmail())
 			.nickname(request.getNickname())
-			.provider(Member.Provider.local)
+			.provider(Provider.LOCAL)
 			.build();
 		Member savedMember = memberRepository.save(member);
 

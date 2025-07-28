@@ -11,8 +11,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.util.JwtUtil;
-import com.oseak.myFestaBackend.domain.CustomUserDetails;
-import com.oseak.myFestaBackend.domain.Member;
+import com.oseak.myFestaBackend.entity.CustomUserDetails;
+import com.oseak.myFestaBackend.entity.Member;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.service.MemberDetailsService;
 
 import jakarta.servlet.FilterChain;
@@ -46,13 +47,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					String email = jwtUtil.getEmailFromToken(jwt);
 					Long memberId = jwtUtil.getMemberIdFromToken(jwt);
 					String nickname = jwtUtil.getNicknameFromToken(jwt);
-					Member.Provider provider = jwtUtil.getProviderFromToken(jwt);
+					Provider provider = jwtUtil.getProviderFromToken(jwt);
 
 					Member member = Member.builder()
 						.email(email)
 						.nickname(nickname)
 						.provider(provider)
-						.memberId(memberId)
+						.id(memberId)
 						.build();
 
 					UserDetails userDetails = new CustomUserDetails(member, null);

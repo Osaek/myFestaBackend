@@ -1,4 +1,4 @@
-package com.oseak.myFestaBackend.domain;
+package com.oseak.myFestaBackend.entity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -6,6 +6,8 @@ import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.oseak.myFestaBackend.entity.enums.Provider;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
 		return member.getNickname();
 	}
 
-	public Member.Provider getProvider() {
+	public Provider getProvider() {
 		return member.getProvider();
 	}
 
