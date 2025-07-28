@@ -41,14 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			// Authorization 헤더에서 JWT 토큰 추출
 			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 				jwt = jwtUtil.resolveToken(authorizationHeader);
-				
+
 				if (jwt != null && jwtUtil.validateToken(jwt) && jwtUtil.isAccessToken(jwt)) {
 					String email = jwtUtil.getEmailFromToken(jwt);
 					Long memberId = jwtUtil.getMemberIdFromToken(jwt);
 					String nickname = jwtUtil.getNicknameFromToken(jwt);
-					Member.Provider provider =
-						jwtUtil.getProviderFromToken(jwt).equals("local") ? Member.Provider.local :
-							Member.Provider.kakao;
+					Member.Provider provider = jwtUtil.getProviderFromToken(jwt);
 
 					Member member = Member.builder()
 						.email(email)
@@ -64,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-					
+
 					log.debug("JWT authentication successful for user: {} (ID: {})", email, memberId);
 				} else {
 					log.warn("JWT token validation failed for request: {}", request.getRequestURI());
