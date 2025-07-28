@@ -5,8 +5,12 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.oseak.myFestaBackend.entity.enums.FestaStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -67,8 +71,9 @@ public class Festa {
 	@Column(name = "fee_info")
 	private String feeInfo;
 
-	@Column(name = "festa_status")
-	private String festaStatus;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "festa_status", nullable = false)
+	private FestaStatus festaStatus;
 
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)
@@ -82,7 +87,7 @@ public class Festa {
 	public Festa(Long contentId, String festaName, Double latitude, Double longitude, String festaAddress,
 		LocalDateTime festaStartAt, LocalDateTime festaEndAt, Integer areaCode, Integer subAreaCode,
 		String overview, String description, String imageUrl, String openTime, String feeInfo,
-		String festaStatus) {
+		FestaStatus festaStatus) {
 		this.contentId = contentId;
 		this.festaName = festaName;
 		this.latitude = latitude;
@@ -105,7 +110,7 @@ public class Festa {
 		this.description = description;
 	}
 
-	public void updateStatus(String status) {
+	public void updateStatus(FestaStatus status) {
 		this.festaStatus = status;
 	}
 }

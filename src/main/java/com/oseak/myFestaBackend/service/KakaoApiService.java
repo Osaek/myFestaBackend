@@ -20,6 +20,7 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.entity.Member;
 import com.oseak.myFestaBackend.entity.MemberOauthToken;
+import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.repository.MemberOauthTokenRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -142,7 +143,7 @@ public class KakaoApiService {
 			.email(email)
 			.nickname(nickname)
 			.profile(profileImage)
-			.provider(Member.Provider.kakao)
+			.provider(Provider.KAKAO)
 			.build();
 
 		memberRepository.save(newMember);
