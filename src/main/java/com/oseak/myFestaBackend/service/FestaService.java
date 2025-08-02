@@ -240,6 +240,19 @@ public class FestaService {
 
 	public List<FestaSummaryDto> getFestaSummariesByContentIds(List<Long> contentIds) {
 		List<Festa> festas = festaRepository.findAllByContentIdIn(contentIds);
+
+		List<Long> foundIds = festas.stream()
+			.map(Festa::getContentId)
+			.toList();
+
+		List<Long> missingIds = contentIds.stream()
+			.filter(id -> !foundIds.contains(id))
+			.toList();
+
+		if (!missingIds.isEmpty()) {
+			throw new OsaekException(ServerErrorCode.FESTA_NOT_FOUND);
+		}
+
 		return festas.stream()
 			.map(FestaSummaryDto::from)
 			.toList();
