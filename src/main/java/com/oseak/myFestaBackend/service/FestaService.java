@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.entity.Festa;
+import com.oseak.myFestaBackend.entity.dto.FestaSimpleDto;
+import com.oseak.myFestaBackend.entity.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 
@@ -224,4 +227,29 @@ public class FestaService {
 	/*TODO : festa 정보 저장될 때 festa_statistic도 같이 만들어줘야함.
 		user_like좀 넣고 festa_statistic 도 넣고 해야 추천 API만들 듯.
 	*/
+
+	public List<FestaSimpleDto> findNearbyFesta(double latitude, double longitude, int distanceKm) {
+		if (!List.of(1, 5, 10, 20).contains(distanceKm)) {
+			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
+		}
+
+		return festaRepository.findByDistance(latitude, longitude, distanceKm).stream()
+			.map(FestaSimpleDto::from)
+			.toList();
+	}
+
+	public List<FestaSummaryDto> getFestaSummariesByContentIds(List<Long> contentIds) {
+		List<Festa> festas = festaRepository.findAllByContentIdIn(contentIds);
+		return festas.stream()
+			.map(FestaSummaryDto::from)
+			.toList();
+	}
+
+	public List<FestaSimpleDto> getRandomFestivals(int count) {
+		List<Festa> randomFestivals = festaRepository.findRandomFestivals(count);
+		return randomFestivals.stream()
+			.map(FestaSimpleDto::from)
+			.toList();
+	}
+
 }
