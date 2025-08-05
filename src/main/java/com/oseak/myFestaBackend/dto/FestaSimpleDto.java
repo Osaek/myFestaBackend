@@ -1,4 +1,4 @@
-package com.oseak.myFestaBackend.entity.dto;
+package com.oseak.myFestaBackend.dto;
 
 import com.oseak.myFestaBackend.entity.Festa;
 

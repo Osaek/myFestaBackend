@@ -23,9 +23,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
+import com.oseak.myFestaBackend.dto.FestaSimpleDto;
+import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.entity.Festa;
-import com.oseak.myFestaBackend.entity.dto.FestaSimpleDto;
-import com.oseak.myFestaBackend.entity.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 

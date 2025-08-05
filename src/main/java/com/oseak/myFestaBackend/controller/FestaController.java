@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oseak.myFestaBackend.entity.dto.FestaSimpleDto;
-import com.oseak.myFestaBackend.entity.dto.FestaSummaryDto;
+import com.oseak.myFestaBackend.dto.FestaSimpleDto;
+import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.service.FestaService;
 
 import lombok.RequiredArgsConstructor;
