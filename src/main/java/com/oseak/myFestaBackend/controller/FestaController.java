@@ -14,6 +14,11 @@ import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.service.FestaService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,17 +38,49 @@ public class FestaController {
 		return ResponseEntity.ok("축제 데이터 수집 및 저장 완료");
 	}
 
+	@Operation(
+		summary = "근처 축제 조회",
+		description = "현재 위치(lat, lng)를 기준으로 특정 거리 내에 있는 축제를 조회합니다.",
+		parameters = {
+			@Parameter(name = "lat", description = "위도", required = true, example = "37.5665"),
+			@Parameter(name = "lng", description = "경도", required = true, example = "126.9780"),
+			@Parameter(name = "distance", description = "검색 반경 (km)", required = true, example = "10")
+		},
+		responses = {
+			@ApiResponse(responseCode = "200", description = "축제 목록 반환", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FestaSimpleDto.class)))
+		}
+	)
 	@GetMapping("/nearby")
 	public ResponseEntity<List<FestaSimpleDto>> getNearbyFestivalIds(@RequestParam double lat, @RequestParam double lng,
 		@RequestParam int distance) {
 		return ResponseEntity.ok(festaService.findNearbyFesta(lat, lng, distance));
 	}
 
+	@Operation(
+		summary = "축제 요약 정보 조회",
+		description = "contentId 리스트를 받아 해당하는 축제들의 요약 정보를 반환합니다.",
+		parameters = {
+			@Parameter(name = "ids", description = "축제 contentId 리스트", required = true, example = "12345,67890")
+		},
+		responses = {
+			@ApiResponse(responseCode = "200", description = "요약 정보 리스트 반환", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FestaSummaryDto.class)))
+		}
+	)
 	@GetMapping("/summary")
 	public ResponseEntity<List<FestaSummaryDto>> getFestivalSummaries(@RequestParam List<Long> ids) {
 		return ResponseEntity.ok(festaService.getFestaSummariesByContentIds(ids));
 	}
 
+	@Operation(
+		summary = "랜덤 축제 조회",
+		description = "요청한 개수만큼 랜덤으로 축제 데이터를 반환합니다.",
+		parameters = {
+			@Parameter(name = "count", description = "조회할 축제 수", required = true, example = "5")
+		},
+		responses = {
+			@ApiResponse(responseCode = "200", description = "랜덤 축제 리스트 반환", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FestaSimpleDto.class)))
+		}
+	)
 	@GetMapping("/random")
 	public ResponseEntity<List<FestaSimpleDto>> getRandomFestivals(@RequestParam int count) {
 		return ResponseEntity.ok(festaService.getRandomFestivals(count));
