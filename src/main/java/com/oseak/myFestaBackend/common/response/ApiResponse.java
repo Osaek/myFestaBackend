@@ -16,7 +16,7 @@ import lombok.Getter;
 @Schema(description = "공통 응답 래퍼")
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T> {
+public class CommonResponse<T> {
 
 	/**
 	 * 커스텀 에러 코드. 성공 시 null.
@@ -44,7 +44,7 @@ public class ApiResponse<T> {
 	 * @param message 메시지 (성공 시 null)
 	 * @param data    응답 데이터
 	 */
-	private ApiResponse(String code, String message, T data) {
+	private CommonResponse(String code, String message, T data) {
 		this.code = code;
 		this.message = message;
 		this.data = data;
@@ -54,19 +54,19 @@ public class ApiResponse<T> {
 	 * 성공 응답을 생성합니다.
 	 *
 	 * @param data 응답 데이터
-	 * @return ApiResponse 인스턴스
+	 * @return CommonResponse 인스턴스
 	 */
-	public static <T> ApiResponse<T> success(T data) {
-		return new ApiResponse<>(null, null, data);
+	public static <T> CommonResponse<T> success(T data) {
+		return new CommonResponse<>(null, null, data);
 	}
 
 	/**
 	 * 본문 없이 성공 응답 (No Content)을 생성합니다.
 	 *
-	 * @return ApiResponse 인스턴스
+	 * @return CommonResponse 인스턴스
 	 */
-	public static <T> ApiResponse<T> noContent() {
-		return new ApiResponse<>(null, null, null);
+	public static <T> CommonResponse<T> noContent() {
+		return new CommonResponse<>(null, null, null);
 	}
 
 	/**
@@ -74,10 +74,10 @@ public class ApiResponse<T> {
 	 *
 	 * @param code    커스텀 에러 코드
 	 * @param message 사용자에게 전달할 메시지
-	 * @return ApiResponse 인스턴스
+	 * @return CommonResponse 인스턴스
 	 */
-	public static <T> ApiResponse<T> fail(String code, String message) {
-		return new ApiResponse<>(code, message, null);
+	public static <T> CommonResponse<T> fail(String code, String message) {
+		return new CommonResponse<>(code, message, null);
 	}
 
 	/**
@@ -86,10 +86,10 @@ public class ApiResponse<T> {
 	 * @param code    커스텀 에러 코드
 	 * @param message 사용자에게 전달할 메시지
 	 * @param data    응답 데이터
-	 * @return ApiResponse 인스턴스
+	 * @return CommonResponse 인스턴스
 	 */
-	public static <T> ApiResponse<T> fail(String code, String message, T data) {
-		return new ApiResponse<>(code, message, data);
+	public static <T> CommonResponse<T> fail(String code, String message, T data) {
+		return new CommonResponse<>(code, message, data);
 	}
 
 }
