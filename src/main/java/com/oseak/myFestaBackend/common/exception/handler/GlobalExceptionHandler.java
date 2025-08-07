@@ -72,7 +72,6 @@ public class GlobalExceptionHandler {
 			.status(errorCode.getHttpStatus())
 			.headers(buildDefaultHeaders())
 			.body(CommonResponse.fail(
-				errorCode.getHttpStatus(),
 				errorCode.getCode(),
 				localizedMessage
 			));
@@ -90,7 +89,6 @@ public class GlobalExceptionHandler {
 			.status(errorCode.getHttpStatus())
 			.headers(buildDefaultHeaders())
 			.body(CommonResponse.fail(
-				errorCode.getHttpStatus(),
 				errorCode.getCode(),
 				customMessage
 			));
