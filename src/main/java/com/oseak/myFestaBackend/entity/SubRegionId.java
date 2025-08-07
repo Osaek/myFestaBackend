@@ -1,28 +1,28 @@
 package com.oseak.myFestaBackend.entity;
 
+import java.io.Serializable;
+
 import org.hibernate.annotations.Comment;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "region")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Region {
-	@Id
-	@Column(name = "region_code")
+@Embeddable
+@EqualsAndHashCode
+public class SubRegionId implements Serializable {
+	@Column(name = "region_code", nullable = false)
 	@Comment("상위지역코드")
 	private Integer regionCode;
 
-	@Column(name = "region_name", nullable = false)
-	@Comment("상위지역명")
-	private String regionName;
+	@Column(name = "sub_region_code", nullable = false)
+	@Comment("하위지역코드")
+	private Integer subRegionCode;
 }

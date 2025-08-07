@@ -36,7 +36,10 @@ public enum ClientErrorCode implements BaseErrorCode {
 	AUTH_ACCOUNT_WITHDRAWN(HttpStatus.FORBIDDEN, "OSAEK-10007", "auth.account.withdrawn"),
 
 	// 권한 관련
-	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized");
+	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized"),
+
+	// 지역 코드 관련
+	REGION_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "region.code.not_found");
 
 	private final HttpStatus httpStatus;
 	private final String code;
