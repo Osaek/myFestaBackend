@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "Area API", description = "지역코드 관련 API(Controller)")
 @Slf4j
 @RestController
-@RequestMapping("/area")
+@RequestMapping("/areas")
 @RequiredArgsConstructor
 public class AreaController {
 
