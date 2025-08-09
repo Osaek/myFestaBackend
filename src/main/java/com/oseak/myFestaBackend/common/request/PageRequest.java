@@ -35,6 +35,7 @@ public class PageRequest {
 	 *
 	 * @return page
 	 */
+	@Schema(hidden = true)
 	public Integer getValidPage() {
 		return page != null && page >= 0 ? page : 0;
 	}
@@ -45,6 +46,7 @@ public class PageRequest {
 	 *
 	 * @return size 크기
 	 */
+	@Schema(hidden = true)
 	public Integer getValidSize() {
 		return size != null && size > 0 && size <= MAX_SIZE ? size : DEFAULT_SIZE;
 	}

@@ -92,7 +92,7 @@ public class FestaController {
 		return ResponseEntity.ok(festaService.getRandomFestivals(count));
 	}
 
-	@GetMapping("/search")
+	@GetMapping()
 	@Operation(summary = "축제 검색", description = "키워드로 축제를 검색합니다")
 	@ApiResponse(
 		responseCode = "200",
