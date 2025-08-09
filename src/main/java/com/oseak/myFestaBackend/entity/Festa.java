@@ -109,6 +109,15 @@ public class Festa {
 		this.overview = overview;
 		this.description = description;
 	}
+	
+	public void updateIntro(String playtime, String feeInfo) {
+		if (playtime != null && !playtime.isBlank()) {
+			this.openTime = playtime;
+		}
+		if (feeInfo != null && !feeInfo.isBlank()) {
+			this.feeInfo = feeInfo;
+		}
+	}
 
 	public void updateStatus(FestaStatus status) {
 		this.festaStatus = status;

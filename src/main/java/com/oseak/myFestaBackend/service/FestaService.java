@@ -56,6 +56,7 @@ public class FestaService {
 	@Value("${tourapi.service-key}")
 	private String serviceKey;
 
+	@Transactional
 	public void fetchAndSaveFestivals(String eventStartDate, Integer areaCode) {
 		try {
 			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/searchFestival2")
@@ -97,12 +98,14 @@ public class FestaService {
 
 				FestaStatus status = getStatusByDate(startAt, endAt);
 				Map<String, String> detailMap = fetchFestivalDetails(contentId, contentTypeId);
+				Map<String, String> introMap = fetchFestivalIntro(contentId, contentTypeId);
 
 				Optional<Festa> optionalFesta = festaRepository.findByContentId(contentId);
 				if (optionalFesta.isPresent()) {
 					log.info("기존 '{}' 행사 (contentId: {}) 업데이트 실행", title, contentId);
 					Festa festa = optionalFesta.get();
 					festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
+					festa.updateIntro(introMap.get("playtime"), introMap.get("usetimefestival"));
 					festa.updateStatus(status);
 					festaRepository.save(festa);
 				} else {
@@ -118,8 +121,8 @@ public class FestaService {
 						.areaCode(item.optInt("areacode"))
 						.subAreaCode(item.optInt("sigungucode"))
 						.imageUrl(item.optString("firstimage"))
-						.openTime(item.optString("playtime"))
-						.feeInfo(item.optString("usetimefestival"))
+						.openTime(introMap.get("playtime"))
+						.feeInfo(introMap.get("usetimefestival"))
 						.festaStatus(status)
 						.overview(detailMap.get("overview"))
 						.description(detailMap.get("description"))
@@ -180,6 +183,51 @@ public class FestaService {
 			throw new OsaekException(ServerErrorCode.MALFORMED_RESPONSE);
 		}
 		return result;
+	}
+
+	private Map<String, String> fetchFestivalIntro(Long contentId, Long contentTypeId) {
+		Map<String, String> result = new HashMap<>();
+		try {
+			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/detailIntro2")
+				.queryParam("MobileOS", "ETC")
+				.queryParam("MobileApp", UriUtils.encode("오색", StandardCharsets.UTF_8))
+				.queryParam("_type", "json")
+				.queryParam("contentId", contentId)
+				.queryParam("contentTypeId", contentTypeId)
+				.queryParam("serviceKey", serviceKey)
+				.build(true)
+				.toUri();
+
+			String response = webClient.get()
+				.uri(uri)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			JSONArray items = new JSONObject(response)
+				.getJSONObject("response")
+				.getJSONObject("body")
+				.getJSONObject("items")
+				.optJSONArray("item");
+
+			if (items != null && items.length() > 0) {
+				JSONObject intro = items.getJSONObject(0);
+				String playtime = optStringOrNull(intro, "playtime");
+				String fee = optStringOrNull(intro, "usetimefestival");
+				result.put("playtime", playtime);
+				result.put("usetimefestival", fee);
+			}
+		} catch (WebClientResponseException e) {
+			throw new OsaekException(ServerErrorCode.SERVICE_UNAVAILABLE);
+		} catch (Exception e) {
+			throw new OsaekException(ServerErrorCode.MALFORMED_RESPONSE);
+		}
+		return result;
+	}
+
+	private String optStringOrNull(JSONObject o, String key) {
+		String v = o.optString(key, null);
+		return (v == null || v.isBlank()) ? null : v;
 	}
 
 	private LocalDateTime parseDate(String dateStr) {
