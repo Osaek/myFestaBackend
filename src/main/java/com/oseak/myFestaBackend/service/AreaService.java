@@ -38,7 +38,7 @@ public class AreaService {
 
 		return areas
 			.stream()
-			.map(AreaResponseDto::of)
+			.map(AreaResponseDto::from)
 			.collect(Collectors.toList());
 	}
 
@@ -53,7 +53,7 @@ public class AreaService {
 
 		return areas
 			.stream()
-			.map(AllSubAreaResponseDto::of)
+			.map(AllSubAreaResponseDto::from)
 			.collect(Collectors.toList());
 	}
 
@@ -72,7 +72,7 @@ public class AreaService {
 
 		return subAreaRepository.findByIdAreaCode(areaCode)
 			.stream()
-			.map(SubAreaResponseDto::of)
+			.map(SubAreaResponseDto::from)
 			.collect(Collectors.toList());
 	}
 }

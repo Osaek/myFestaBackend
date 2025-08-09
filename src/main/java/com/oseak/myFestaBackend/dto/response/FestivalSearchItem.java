@@ -66,7 +66,7 @@ public class FestivalSearchItem {
 	@Schema(description = "축제 상태", example = "ONGOING")
 	private FestaStatus festaStatus;
 
-	public static FestivalSearchItem of(Festa festival) {
+	public static FestivalSearchItem from(Festa festival) {
 		return FestivalSearchItem.builder()
 			.festaId(festival.getFestaId())
 			.contentId(festival.getContentId())

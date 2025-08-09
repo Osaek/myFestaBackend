@@ -24,7 +24,7 @@ public class FestivalSearchResponse {
 	@Schema(description = "축제 목록", example = "[]")
 	private List<FestivalSearchItem> festivals;
 
-	public static FestivalSearchResponse of(Page<FestivalSearchItem> page) {
+	public static FestivalSearchResponse from(Page<FestivalSearchItem> page) {
 		return FestivalSearchResponse.builder()
 			.festivals(page.getContent())
 			.pageInfo(PageInfo.of(page))

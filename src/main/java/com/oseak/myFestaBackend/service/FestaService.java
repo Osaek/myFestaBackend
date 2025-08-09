@@ -327,7 +327,7 @@ public class FestaService {
 			Sort.by(Sort.Direction.ASC, "festaStartAt"));
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
-		return page.map(FestivalSearchItem::of);
+		return page.map(FestivalSearchItem::from);
 	}
 
 }

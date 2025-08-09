@@ -18,7 +18,7 @@ public class AreaResponseDto {
 	@Schema(description = "지역코드", example = "1")
 	Integer areaCode;
 
-	public static AreaResponseDto of(Area area) {
+	public static AreaResponseDto from(Area area) {
 		return AreaResponseDto.builder()
 			.areaName(area.getAreaName())
 			.areaCode(area.getAreaCode())

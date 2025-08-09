@@ -106,7 +106,7 @@ public class FestaController {
 
 		log.debug("전체 요청 객체: {}", request);
 		Page<FestivalSearchItem> festivals = festaService.search(request);
-		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.of(festivals);
+		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.from(festivals);
 
 		return CommonResponse.success(festivalSearchResponse);
 	}

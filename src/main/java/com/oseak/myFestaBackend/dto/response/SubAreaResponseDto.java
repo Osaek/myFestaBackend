@@ -18,7 +18,7 @@ public class SubAreaResponseDto {
 	@Schema(description = "지역코드", example = "1")
 	Integer subAreaCode;
 
-	public static SubAreaResponseDto of(SubArea subArea) {
+	public static SubAreaResponseDto from(SubArea subArea) {
 		return SubAreaResponseDto.builder()
 			.subAreaName(subArea.getSubAreaName())
 			.subAreaCode(subArea.getId().getSubAreaCode())
