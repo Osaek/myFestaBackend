@@ -19,10 +19,10 @@ import lombok.experimental.SuperBuilder;
 @Schema(description = "축제 검색 요청")
 public class FestivalSearchRequest extends PageRequest {
 	@Schema(description = "지역 코드", example = "1")
-	private Integer regionCode;
+	private Integer areaCode;
 
 	@Schema(description = "세부 지역 코드", example = "11")
-	private Integer subRegionCode;
+	private Integer subAreaCode;
 
 	@Schema(description = "검색 키워드", example = "벚꽃축제")
 	private String keyword;

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
-import com.oseak.myFestaBackend.repository.RegionRepository;
+import com.oseak.myFestaBackend.repository.AreaRepository;
 import com.oseak.myFestaBackend.service.FestaService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,15 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 public class FestaBatchScheduler {
 
 	private final FestaService festaService;
-	private final RegionRepository regionRepository;
+	private final AreaRepository areaRepository;
 
 	//TODO : 시간 변경필요
 	@Scheduled(cron = "0 1 0 * * *")
 	public void fetchAndSaveFestivalsBatch() {
 		log.info("축제 정보 수집 배치 정상 시작");
 		String eventStartDate = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-		regionRepository.findAll().forEach(region -> {
-			Integer areaCode = region.getRegionCode();
+		areaRepository.findAll().forEach(area -> {
+			Integer areaCode = area.getAreaCode();
 			try {
 				log.info("지역 코드 {} 축제 수집 시작", areaCode);
 				festaService.fetchAndSaveFestivals(eventStartDate, areaCode);

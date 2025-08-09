@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oseak.myFestaBackend.common.response.CommonResponse;
-import com.oseak.myFestaBackend.dto.response.RegionResponseDto;
-import com.oseak.myFestaBackend.dto.response.SubRegionResponseDto;
-import com.oseak.myFestaBackend.service.RegionService;
+import com.oseak.myFestaBackend.dto.response.AllSubAreaResponseDto;
+import com.oseak.myFestaBackend.dto.response.AreaResponseDto;
+import com.oseak.myFestaBackend.dto.response.SubAreaResponseDto;
+import com.oseak.myFestaBackend.service.AreaService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,14 +21,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Tag(name = "Region API", description = "지역코드 관련 API(Controller)")
+@Tag(name = "Area API", description = "지역코드 관련 API(Controller)")
 @Slf4j
 @RestController
-@RequestMapping("/regions")
+@RequestMapping("/area")
 @RequiredArgsConstructor
-public class RegionController {
+public class AreaController {
 
-	private final RegionService regionService;
+	private final AreaService areaService;
 
 	@Operation(
 		summary = "상위 지역 코드 요청 API",
@@ -38,9 +39,9 @@ public class RegionController {
 		}
 	)
 	@GetMapping
-	public ResponseEntity<CommonResponse<List<RegionResponseDto>>> getRegions() {
-		List<RegionResponseDto> regions = regionService.getAllRegions();
-		return ResponseEntity.ok(CommonResponse.success(regions));
+	public ResponseEntity<CommonResponse<List<AreaResponseDto>>> getAreas() {
+		List<AreaResponseDto> areas = areaService.getAllAreas();
+		return ResponseEntity.ok(CommonResponse.success(areas));
 	}
 
 	@Operation(
@@ -51,10 +52,10 @@ public class RegionController {
 			@ApiResponse(responseCode = "500", description = "하위 지역 코드 조회 실패")
 		}
 	)
-	@GetMapping("/sub-regions")
-	public ResponseEntity<CommonResponse<List<SubRegionResponseDto>>> getSubRegions() {
-		List<SubRegionResponseDto> subRegions = regionService.getSubRegions();
-		return ResponseEntity.ok(CommonResponse.success(subRegions));
+	@GetMapping("/sub-areas")
+	public ResponseEntity<CommonResponse<List<AllSubAreaResponseDto>>> getSubAreas() {
+		List<AllSubAreaResponseDto> subAreas = areaService.getSubAreas();
+		return ResponseEntity.ok(CommonResponse.success(subAreas));
 	}
 
 	@Operation(
@@ -65,11 +66,11 @@ public class RegionController {
 			@ApiResponse(responseCode = "500", description = "하위 지역 코드 조회 실패")
 		}
 	)
-	@GetMapping("/{regionCode}/sub-regions")
-	public ResponseEntity<CommonResponse<List<SubRegionResponseDto>>> getSubRegionsByRegionCode(
+	@GetMapping("/{areaCode}/sub-areas")
+	public ResponseEntity<CommonResponse<List<SubAreaResponseDto>>> getSubAreasByAreaCode(
 		@Parameter(description = "상위 지역을 식별하는 고유 코드", required = true, example = "1")
-		@PathVariable("regionCode") Integer regionCode) {
-		List<SubRegionResponseDto> subRegions = regionService.getSubRegionsByRegionCode(regionCode);
-		return ResponseEntity.ok(CommonResponse.success(subRegions));
+		@PathVariable("areaCode") Integer areaCode) {
+		List<SubAreaResponseDto> subAreas = areaService.getSubAreasByAreaCode(areaCode);
+		return ResponseEntity.ok(CommonResponse.success(subAreas));
 	}
 }

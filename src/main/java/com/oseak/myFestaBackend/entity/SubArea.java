@@ -3,8 +3,8 @@ package com.oseak.myFestaBackend.entity;
 import org.hibernate.annotations.Comment;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,17 +12,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "region")
+@Table(name = "sub_region")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Region {
-	@Id
-	@Column(name = "region_code")
-	@Comment("상위지역코드")
-	private Integer regionCode;
+public class SubArea {
+	@EmbeddedId
+	private SubAreaId id;
 
-	@Column(name = "region_name", nullable = false)
-	@Comment("상위지역명")
-	private String regionName;
+	@Column(name = "sub_region_name", nullable = false)
+	@Comment("하위지역명")
+	private String subAreaName;
 }

@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
  *   <li><b>도메인코드 (2자리)</b>: 10 = 회원/인증 도메인</li>
  *   <li><b>에러번호 (3자리)</b>: 도메인 내 개별 에러 식별 번호</li>
  * </ul>
- *
+ * <p>
  * 예: <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
  */
 @Getter
@@ -39,7 +39,7 @@ public enum ClientErrorCode implements BaseErrorCode {
 	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized"),
 
 	// 지역 코드 관련
-	REGION_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "region.code.not_found");
+	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found");
 
 	private final HttpStatus httpStatus;
 	private final String code;

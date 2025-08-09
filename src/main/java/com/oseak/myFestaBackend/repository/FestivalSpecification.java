@@ -14,8 +14,8 @@ public class FestivalSpecification {
 
 	public static Specification<Festa> createSpecification(FestivalSearchRequest request) {
 		return Specification.allOf(
-			areaCodeEquals(request.getRegionCode()),
-			subAreaCodeEquals(request.getSubRegionCode()),
+			areaCodeEquals(request.getAreaCode()),
+			subAreaCodeEquals(request.getSubAreaCode()),
 			keywordContains(request.getKeyword()),
 			dateRangeOverlaps(request.getStartDate(), request.getEndDate())
 		);

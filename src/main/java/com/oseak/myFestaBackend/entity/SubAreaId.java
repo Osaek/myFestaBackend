@@ -17,12 +17,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Embeddable
 @EqualsAndHashCode
-public class SubRegionId implements Serializable {
+public class SubAreaId implements Serializable {
 	@Column(name = "region_code", nullable = false)
 	@Comment("상위지역코드")
-	private Integer regionCode;
+	private Integer areaCode;
 
 	@Column(name = "sub_region_code", nullable = false)
 	@Comment("하위지역코드")
-	private Integer subRegionCode;
+	private Integer subAreaCode;
 }

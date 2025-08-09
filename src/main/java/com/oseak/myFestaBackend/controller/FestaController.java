@@ -101,8 +101,8 @@ public class FestaController {
 	)
 	public CommonResponse<FestivalSearchResponse> searchFestivals(
 		@Parameter(description = "축제 검색 조건") @ModelAttribute FestivalSearchRequest request) {
-		log.debug("받은 검색 요청: regionCode={}, subRegionCode={}, keyword={}",
-			request.getRegionCode(), request.getSubRegionCode(), request.getKeyword());
+		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
+			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
 
 		log.debug("전체 요청 객체: {}", request);
 		Page<FestivalSearchItem> festivals = festaService.search(request);
