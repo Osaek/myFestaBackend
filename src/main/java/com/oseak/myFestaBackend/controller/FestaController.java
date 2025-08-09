@@ -4,14 +4,20 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
+import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
+import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
+import com.oseak.myFestaBackend.dto.response.FestivalSearchResponse;
 import com.oseak.myFestaBackend.service.FestaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,6 +90,25 @@ public class FestaController {
 	@GetMapping("/random")
 	public ResponseEntity<List<FestaSimpleDto>> getRandomFestivals(@RequestParam int count) {
 		return ResponseEntity.ok(festaService.getRandomFestivals(count));
+	}
+
+	@GetMapping("/search")
+	@Operation(summary = "축제 검색", description = "키워드로 축제를 검색합니다")
+	@ApiResponse(
+		responseCode = "200",
+		description = "검색 성공",
+		content = @Content(schema = @Schema(implementation = CommonResponse.class))
+	)
+	public CommonResponse<FestivalSearchResponse> searchFestivals(
+		@Parameter(description = "축제 검색 조건") @ModelAttribute FestivalSearchRequest request) {
+		log.debug("받은 검색 요청: regionCode={}, subRegionCode={}, keyword={}",
+			request.getRegionCode(), request.getSubRegionCode(), request.getKeyword());
+
+		log.debug("전체 요청 객체: {}", request);
+		Page<FestivalSearchItem> festivals = festaService.search(request);
+		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.of(festivals);
+
+		return CommonResponse.success(festivalSearchResponse);
 	}
 
 }

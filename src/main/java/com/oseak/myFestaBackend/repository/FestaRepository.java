@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import com.oseak.myFestaBackend.entity.Festa;
 
-public interface FestaRepository extends JpaRepository<Festa, Long> {
+public interface FestaRepository extends JpaRepository<Festa, Long>, JpaSpecificationExecutor<Festa> {
 	Optional<Festa> findByFestaName(String festaName);
 
 	Optional<Festa> findByFestaNameAndFestaStartAt(String festaName, LocalDateTime festaStartAt);
@@ -34,4 +35,5 @@ public interface FestaRepository extends JpaRepository<Festa, Long> {
 
 	@Query(value = "SELECT * FROM festa ORDER BY RAND() LIMIT :limit", nativeQuery = true)
 	List<Festa> findRandomFestivals(int limit);
+
 }
