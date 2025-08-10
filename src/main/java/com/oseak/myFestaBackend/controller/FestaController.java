@@ -100,7 +100,7 @@ public class FestaController {
 		description = "검색 성공",
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
-	public CommonResponse<FestivalSearchResponse> searchFestivals(
+	public ResponseEntity<CommonResponse<FestivalSearchResponse>> searchFestivals(
 		@Parameter(description = "축제 검색 조건") @ModelAttribute FestivalSearchRequest request) {
 		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
 			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
@@ -109,14 +109,12 @@ public class FestaController {
 		Page<FestivalSearchItem> festivals = festaService.search(request);
 		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.from(festivals);
 
-		return CommonResponse.success(festivalSearchResponse);
+		return ResponseEntity.ok(CommonResponse.success(festivalSearchResponse));
 	}
-
 
 	// @GetMapping("/detail")
 	// public ResponseEntity<FestaDetailDto> getDetailFestivals(@RequestParam Long contentId) {
 	// 	return ResponseEntity.ok(festaService.getDetailFestival(contentId));
 	// }
-
 
 }
