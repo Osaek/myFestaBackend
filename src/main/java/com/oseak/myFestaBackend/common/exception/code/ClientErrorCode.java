@@ -15,7 +15,8 @@ import lombok.RequiredArgsConstructor;
  *   <li><b>에러번호 (3자리)</b>: 도메인 내 개별 에러 식별 번호</li>
  * </ul>
  * <p>
- * 예: <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
+ * <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
+ * <code>OSAEK-30001</code> → 축제 도메인(30)에서 정의한 첫 번째 에러
  */
 @Getter
 @RequiredArgsConstructor
@@ -55,11 +56,11 @@ public enum ClientErrorCode implements BaseErrorCode {
 	OAUTH_PASSWORD_CANT_CHANGE(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10217", "password.cant_change"),
 
 	// 지역 코드 관련
-	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-30009", "area.code.not_found"),
+	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-30001", "area.code.not_found"),
 
 	// 축제 관련
-	FESTIVAL_ID_NULL(HttpStatus.BAD_REQUEST, "OSAEK-30001", "festival.id.null"),
-	FESTIVAL_ID_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-3002", "festival.id.invalid");
+	FESTIVAL_ID_NULL(HttpStatus.BAD_REQUEST, "OSAEK-30002", "festival.id.null"),
+	FESTIVAL_ID_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-30003", "festival.id.invalid");
 
 	private final HttpStatus httpStatus;
 	private final String code;
