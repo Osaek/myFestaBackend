@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
  *   <li><b>도메인코드 (2자리)</b>: 10 = 회원/인증 도메인</li>
  *   <li><b>에러번호 (3자리)</b>: 도메인 내 개별 에러 식별 번호</li>
  * </ul>
- * <p>
+ *
  * 예: <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
  */
 @Getter
@@ -35,9 +35,24 @@ public enum ClientErrorCode implements BaseErrorCode {
 	AUTH_CREDENTIALS_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10005", "auth.credentials.invalid"),
 	AUTH_ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "OSAEK-10006", "auth.account.disabled"),
 	AUTH_ACCOUNT_WITHDRAWN(HttpStatus.FORBIDDEN, "OSAEK-10007", "auth.account.withdrawn"),
+	AUTH_LOGIN_METHOD_INVALID(HttpStatus.FORBIDDEN, "OSAEK-10007", "auth.login.method.invalid"),
 
 	// 권한 관련
 	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized"),
+
+	// jwt 토큰 관련
+	JWT_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10110", "jwt.refresh_token.invalid"),
+	JWT_REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10111", "jwt.refresh_token.not_found"),
+	JWT_REFRESH_TOKEN_EXPIRED(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10112", "jwt.refresh_token.expired"),
+	JWT_TOKEN_RETIRED(HttpStatus.UNAUTHORIZED, "OSAEK-10113", "jwt.token.retired"),
+	JWT_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10114", "jwt.token.invalid"),
+	JWT_TOKEN_SIGN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10115", "jwt.token.sign_invalid"),
+	JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10116", "jwt.token.not_found"),
+
+	// 패스워드 관련
+	PASSWORD_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10215", "password.not_found"),
+	PASSWORD_NOT_CORRECT(HttpStatus.UNAUTHORIZED, "OSAEK-10216", "password.not_correct"),
+	OAUTH_PASSWORD_CANT_CHANGE(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10217", "password.cant_change"),
 
 	// 지역 코드 관련
 	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found");

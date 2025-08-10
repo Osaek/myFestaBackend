@@ -57,9 +57,10 @@ public class FestaController {
 		}
 	)
 	@GetMapping("/nearby")
-	public ResponseEntity<List<FestaSimpleDto>> getNearbyFestivalIds(@RequestParam double lat, @RequestParam double lng,
+	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getNearbyFestivalIds(@RequestParam double lat,
+		@RequestParam double lng,
 		@RequestParam int distance) {
-		return ResponseEntity.ok(festaService.findNearbyFesta(lat, lng, distance));
+		return ResponseEntity.ok(CommonResponse.success(festaService.findNearbyFesta(lat, lng, distance)));
 	}
 
 	@Operation(
@@ -73,8 +74,8 @@ public class FestaController {
 		}
 	)
 	@GetMapping("/summary")
-	public ResponseEntity<List<FestaSummaryDto>> getFestivalSummaries(@RequestParam List<Long> ids) {
-		return ResponseEntity.ok(festaService.getFestaSummariesByContentIds(ids));
+	public ResponseEntity<CommonResponse<List<FestaSummaryDto>>> getFestivalSummaries(@RequestParam List<Long> ids) {
+		return ResponseEntity.ok(CommonResponse.success(festaService.getFestaSummariesByContentIds(ids)));
 	}
 
 	@Operation(
@@ -88,8 +89,8 @@ public class FestaController {
 		}
 	)
 	@GetMapping("/random")
-	public ResponseEntity<List<FestaSimpleDto>> getRandomFestivals(@RequestParam int count) {
-		return ResponseEntity.ok(festaService.getRandomFestivals(count));
+	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getRandomFestivals(@RequestParam int count) {
+		return ResponseEntity.ok(CommonResponse.success(festaService.getRandomFestivals(count)));
 	}
 
 	@GetMapping()
@@ -110,5 +111,12 @@ public class FestaController {
 
 		return CommonResponse.success(festivalSearchResponse);
 	}
+
+
+	// @GetMapping("/detail")
+	// public ResponseEntity<FestaDetailDto> getDetailFestivals(@RequestParam Long contentId) {
+	// 	return ResponseEntity.ok(festaService.getDetailFestival(contentId));
+	// }
+
 
 }
