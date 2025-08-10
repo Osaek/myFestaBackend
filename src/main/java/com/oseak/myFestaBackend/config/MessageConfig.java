@@ -35,7 +35,7 @@ public class MessageConfig {
 	@Bean(name = "messageSource")
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource source = new ReloadableResourceBundleMessageSource();
-		source.setBasename("classpath:errors"); // 메시지 파일 경로
+		source.setBasenames("classpath:errors", "classpath:validation"); // 메시지 파일 경로
 		source.setDefaultEncoding("UTF-8");     // 인코딩 설정
 		return source;
 	}
