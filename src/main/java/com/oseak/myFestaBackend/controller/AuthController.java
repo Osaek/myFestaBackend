@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oseak.myFestaBackend.common.response.ApiResponse;
+import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.auth.LoginRequestDto;
 import com.oseak.myFestaBackend.dto.auth.LoginResponseDto;
 import com.oseak.myFestaBackend.dto.auth.RefreshTokenRequestDto;
@@ -17,6 +17,7 @@ import com.oseak.myFestaBackend.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +32,7 @@ public class AuthController {
 		summary = "일반 로그인",
 		description = "이메일과 비밀번호를 사용한 일반 로그인을 수행합니다. LOCAL 제공자로 가입된 사용자만 로그인 가능합니다.",
 		responses = {
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "200",
 				description = "로그인 성공",
 				content = @Content(
@@ -54,7 +55,7 @@ public class AuthController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "400",
 				description = "로그인 실패 - 잘못된 이메일 또는 비밀번호",
 				content = @Content(
@@ -89,16 +90,16 @@ public class AuthController {
 		}
 	)
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
+	public ResponseEntity<CommonResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
 		LoginResponseDto response = authService.login(request);
-		return ResponseEntity.ok(ApiResponse.success(response));
+		return ResponseEntity.ok(CommonResponse.success(response));
 	}
 
 	@Operation(
 		summary = "액세스 토큰 갱신",
 		description = "Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.",
 		responses = {
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "200",
 				description = "토큰 갱신 성공",
 				content = @Content(
@@ -117,7 +118,7 @@ public class AuthController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "401",
 				description = "유효하지 않은 Refresh Token",
 				content = @Content(
@@ -133,7 +134,7 @@ public class AuthController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "404",
 				description = "Refresh Token을 찾을 수 없음",
 				content = @Content(
@@ -152,17 +153,17 @@ public class AuthController {
 		}
 	)
 	@PostMapping("/refresh")
-	public ResponseEntity<ApiResponse<RefreshTokenResponseDto>> refreshAccessToken(
+	public ResponseEntity<CommonResponse<RefreshTokenResponseDto>> refreshAccessToken(
 		@RequestBody RefreshTokenRequestDto request) {
 		RefreshTokenResponseDto response = authService.refreshAccessToken(request);
-		return ResponseEntity.ok(ApiResponse.success(response));
+		return ResponseEntity.ok(CommonResponse.success(response));
 	}
 
 	@Operation(
 		summary = "로그아웃",
 		description = "사용자 로그아웃을 수행합니다. 서버에 저장된 Refresh Token을 삭제하여 토큰 무효화를 진행합니다.",
 		responses = {
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "200",
 				description = "로그아웃 성공",
 				content = @Content(
@@ -179,7 +180,7 @@ public class AuthController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "401",
 				description = "유효하지 않은 Access Token",
 				content = @Content(
@@ -198,10 +199,10 @@ public class AuthController {
 		}
 	)
 	@PostMapping("/logout")
-	public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String token) {
+	public ResponseEntity<CommonResponse<Void>> logout(@RequestHeader("Authorization") String token) {
 		// TODO: 블랙리스트 방법으로 할거라면 구현해야함.
 		// 현재는 서버에서는 아무것도 안하고 클라이언트 측 토큰 삭제 방법
 		authService.logout(token);
-		return ResponseEntity.ok(ApiResponse.success(null));
+		return ResponseEntity.ok(CommonResponse.success(null));
 	}
 }

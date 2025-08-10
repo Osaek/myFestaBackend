@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
-import com.oseak.myFestaBackend.common.response.ApiResponse;
+import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.config.filter.JwtAuthenticationFilter;
 
 import lombok.extern.slf4j.Slf4j;
@@ -74,8 +74,7 @@ public class SecurityConfig {
 
 					// ApiResponse 형식으로 오류 응답 생성
 					ObjectMapper objectMapper = new ObjectMapper();
-					ApiResponse<?> errorResponse = ApiResponse.fail(
-						ex.getErrorCode().getHttpStatus(),
+					CommonResponse<?> errorResponse = CommonResponse.fail(
 						ex.getErrorCode().getCode(),
 						ex.getErrorCode().getMessageKey() // 실제로는 MessageUtil을 통해 메시지를 가져와야 함
 					);

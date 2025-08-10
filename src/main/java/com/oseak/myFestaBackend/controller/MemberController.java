@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oseak.myFestaBackend.common.response.ApiResponse;
+import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.common.util.SecurityUtil;
 import com.oseak.myFestaBackend.dto.member.ChangePasswordRequestDto;
 import com.oseak.myFestaBackend.dto.member.ChangePasswordResponseDto;
@@ -18,6 +18,7 @@ import com.oseak.myFestaBackend.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class MemberController {
 		summary = "회원가입",
 		description = "새로운 회원을 등록합니다. 이메일 중복 검사를 수행합니다.",
 		responses = {
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "201",
 				description = "회원가입 성공",
 				content = @Content(
@@ -55,7 +56,7 @@ public class MemberController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "409",
 				description = "이메일 중복",
 				content = @Content(
@@ -71,7 +72,7 @@ public class MemberController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "400",
 				description = "유효성 검사 실패",
 				content = @Content(
@@ -90,11 +91,11 @@ public class MemberController {
 		}
 	)
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse<CreateUserResponseDto>> createMember(
+	public ResponseEntity<CommonResponse<CreateUserResponseDto>> createMember(
 		@RequestBody @Valid CreateUserRequestDto request) {
 		CreateUserResponseDto user = memberService.createUser(request);
 
-		return ResponseEntity.ok(ApiResponse.success(user));
+		return ResponseEntity.ok(CommonResponse.success(user));
 	}
 
 	@Operation(
@@ -103,7 +104,7 @@ public class MemberController {
 		security = @SecurityRequirement(name = "bearerAuth")
 	)
 	@ApiResponses(value = {
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+		@ApiResponse(
 			responseCode = "200",
 			description = "탈퇴 성공",
 			content = @Content(
@@ -120,24 +121,24 @@ public class MemberController {
 				)
 			)
 		),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+		@ApiResponse(
 			responseCode = "401",
 			description = "인증되지 않은 사용자"
 		)
 	})
 	@PostMapping("/withdraw")
-	public ResponseEntity<ApiResponse<WithdrawMemberResponseDto>> withdrawMember() {
+	public ResponseEntity<CommonResponse<WithdrawMemberResponseDto>> withdrawMember() {
 		Long memberId = SecurityUtil.getCurrentUserId();
 		WithdrawMemberResponseDto response = memberService.withdrawMember(memberId);
 
-		return ResponseEntity.ok(ApiResponse.success(response));
+		return ResponseEntity.ok(CommonResponse.success(response));
 	}
 
 	@Operation(
 		summary = "비밀번호 변경",
 		description = "현재 비밀번호를 확인한 후 새로운 비밀번호로 변경합니다. LOCAL 제공자 사용자만 가능합니다.",
 		responses = {
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "200",
 				description = "비밀번호 변경 성공",
 				content = @Content(
@@ -154,7 +155,7 @@ public class MemberController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "400",
 				description = "현재 비밀번호 불일치",
 				content = @Content(
@@ -170,7 +171,7 @@ public class MemberController {
 					)
 				)
 			),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			@ApiResponse(
 				responseCode = "403",
 				description = "OAuth 사용자는 비밀번호 변경 불가",
 				content = @Content(
@@ -189,11 +190,11 @@ public class MemberController {
 		}
 	)
 	@PostMapping("/change")
-	public ResponseEntity<ApiResponse<ChangePasswordResponseDto>> changePassword(
+	public ResponseEntity<CommonResponse<ChangePasswordResponseDto>> changePassword(
 		@RequestBody @Valid ChangePasswordRequestDto request) {
 		Long memberId = SecurityUtil.getCurrentUserId();
 
 		ChangePasswordResponseDto response = memberService.changePassword(request, memberId);
-		return ResponseEntity.ok(ApiResponse.success(response));
+		return ResponseEntity.ok(CommonResponse.success(response));
 	}
 }
