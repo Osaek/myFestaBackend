@@ -87,7 +87,7 @@ jobs:
   build-and-publish:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/OSAEK-CI-CD-TEST' || github.event_name == 'release'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
     
     permissions:
       contents: read
@@ -151,7 +151,7 @@ jobs:
           type=ref,event=branch
           type=semver,pattern={{version}}
           type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable=${{ github.ref == 'refs/heads/OSAEK-CI-CD-TEST' }}
+          type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
           
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -491,7 +491,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📱 Application Info:" >> $GITHUB_STEP_SUMMARY
           echo "- **URL**: http://${{ env.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: Test (OSAEK-CI-CD-TEST)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Test (main)" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
