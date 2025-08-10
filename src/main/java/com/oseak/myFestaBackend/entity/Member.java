@@ -1,11 +1,14 @@
 package com.oseak.myFestaBackend.entity;
 
+import static com.oseak.myFestaBackend.common.exception.code.ClientErrorCode.*;
+
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.entity.enums.Provider;
 
 import jakarta.persistence.Column;
@@ -59,11 +62,20 @@ public class Member {
 	private LocalDateTime withdrawnAt;
 
 	@Builder
-	public Member(String email, String nickname, Provider provider, String profile) {
+	public Member(Long id, String email, String nickname, Provider provider, String profile) {
+		this.id = id;
 		this.email = email;
 		this.nickname = nickname;
 		this.provider = provider;
 		this.profile = profile;
 	}
 
+	public void withdraw() {
+		if (this.isWithdrawn) {
+			throw new OsaekException(USER_ID_NOT_FOUND);
+		}
+
+		isWithdrawn = true;
+		withdrawnAt = LocalDateTime.now();
+	}
 }
