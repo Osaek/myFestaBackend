@@ -25,6 +25,7 @@ import com.oseak.myFestaBackend.entity.Member;
 import com.oseak.myFestaBackend.entity.MemberOauthToken;
 import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.generator.NicknameGenerator;
+import com.oseak.myFestaBackend.generator.ProfileGenerator;
 import com.oseak.myFestaBackend.repository.MemberOauthTokenRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -40,6 +41,7 @@ public class KakaoApiService {
 	private final ObjectMapper objectMapper;
 	private final AuthService authService;
 	private final NicknameGenerator nicknameGenerator;
+	private final ProfileGenerator profileGenerator;
 
 	@Value("${kakao.client-id}")
 	private String clientId;
@@ -136,6 +138,7 @@ public class KakaoApiService {
 		// String nickname = (String)profile.get("nickname");
 		// profile 추가시 사용
 		// String profileImage = (String)profile.get("profile_image_url");
+		String profileImage = profileGenerator.getRandomProfileImagePath();
 
 		if (email == null || nickname == null) {
 			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
@@ -152,7 +155,7 @@ public class KakaoApiService {
 			.email(email)
 			.nickname(nickname)
 			.provider(Provider.KAKAO)
-			// .profile(profileImage)
+			.profile(profileImage)
 			.build();
 
 		memberRepository.save(newMember);

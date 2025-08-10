@@ -13,10 +13,12 @@ public class CreateUserResponseDto {
 	private String email;
 	private String nickname;
 	private Provider provider;
+	private String profile;
 
 	public CreateUserResponseDto(Member member) {
 		this.email = member.getEmail();
 		this.nickname = member.getNickname();
 		this.provider = member.getProvider();
+		this.profile = member.getProfile();
 	}
 }

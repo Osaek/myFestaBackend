@@ -16,6 +16,7 @@ import com.oseak.myFestaBackend.entity.Member;
 import com.oseak.myFestaBackend.entity.MemberPassword;
 import com.oseak.myFestaBackend.entity.enums.Provider;
 import com.oseak.myFestaBackend.generator.NicknameGenerator;
+import com.oseak.myFestaBackend.generator.ProfileGenerator;
 import com.oseak.myFestaBackend.repository.MemberPasswordRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -31,6 +32,7 @@ public class MemberService {
 	private final MemberPasswordRepository memberPasswordRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final NicknameGenerator nicknameGenerator;
+	private final ProfileGenerator profileGenerator;
 
 	// 로컬 회원가입 로직
 	@Transactional
@@ -41,10 +43,12 @@ public class MemberService {
 		}
 
 		String nickname = nicknameGenerator.generate("ko");
+		String profile = profileGenerator.getRandomProfileImagePath();
 
 		Member member = Member.builder()
 			.email(request.getEmail())
 			.nickname(nickname)
+			.profile(profile)
 			.provider(Provider.LOCAL)
 			.build();
 		Member savedMember = memberRepository.save(member);

@@ -12,14 +12,16 @@ public class LoginResponseDto {
 	private Long memberId;
 	private String nickname;
 	private String email;
+	private String profile;
 
 	@Builder
 	public LoginResponseDto(String accessToken, String refreshToken, Long
-		memberId, String nickname, String email) {
+		memberId, String nickname, String email, String profile) {
 		this.accessToken = accessToken;
 		this.refreshToken = refreshToken;
 		this.memberId = memberId;
 		this.nickname = nickname;
 		this.email = email;
+		this.profile = profile;
 	}
 }

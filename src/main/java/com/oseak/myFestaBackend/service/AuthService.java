@@ -112,6 +112,7 @@ public class AuthService {
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.nickname(member.getNickname())
+			.profile(member.getProfile())
 			.build();
 	}
 
