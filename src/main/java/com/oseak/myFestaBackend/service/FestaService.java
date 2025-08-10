@@ -344,7 +344,7 @@ public class FestaService {
 
 		Festa festival = festaRepository.findById(id)
 			.orElseThrow(() -> {
-				log.warn("축제를 찾을 수 없습니다: id={}", id);
+				log.debug("축제를 찾을 수 없습니다: id={}", id);
 				return new OsaekException(FESTA_NOT_FOUND);
 			});
 
