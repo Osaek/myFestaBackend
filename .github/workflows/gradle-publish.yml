@@ -25,6 +25,8 @@ env:
   KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
   KAKAO_REDIRECT_URL: ${{ secrets.KAKAO_REDIRECT_URL }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRATION_ACCESS_TOKEN: ${{ secrets.JWT_EXPIRATION_ACCESS_TOKEN }}
+  JWT_EXPIRATION_REFRESH_TOKEN: ${{ secrets.JWT_EXPIRATION_REFRESH_TOKEN }}
   DB_HOST: ${{ secrets.DB_HOST }}
   DB_NAME: ${{ secrets.DB_NAME }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -366,6 +368,8 @@ jobs:
             -e DB_URL="${{ env.DB_URL }}" \
             -e SERVER_URL=http://${{ env.EC2_HOST }} \
             -e TOUR_API_URL="${{ env.TOUR_API_URL }}" \
+            -e JWT_EXPIRATION_ACCESS_TOKEN="${{ env.JWT_EXPIRATION_ACCESS_TOKEN }}" \
+            -e JWT_EXPIRATION_REFRESH_TOKEN="${{ env.JWT_EXPIRATION_REFRESH_TOKEN }}" \
             -e TOUR_API_SERVICE_KEY="${{ env.TOUR_API_SERVICE_KEY}}" \
             --restart unless-stopped \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest)
