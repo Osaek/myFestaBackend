@@ -1,5 +1,7 @@
 package com.oseak.myFestaBackend.service;
 
+import static com.oseak.myFestaBackend.common.exception.code.ClientErrorCode.*;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,9 +20,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
+import com.oseak.myFestaBackend.dto.auth.LoginResponseDto;
 import com.oseak.myFestaBackend.entity.Member;
 import com.oseak.myFestaBackend.entity.MemberOauthToken;
 import com.oseak.myFestaBackend.entity.enums.Provider;
+import com.oseak.myFestaBackend.generator.NicknameGenerator;
 import com.oseak.myFestaBackend.repository.MemberOauthTokenRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -34,6 +38,8 @@ public class KakaoApiService {
 	private final MemberOauthTokenRepository oauthTokenRepository;
 	private final WebClient webClient;
 	private final ObjectMapper objectMapper;
+	private final AuthService authService;
+	private final NicknameGenerator nicknameGenerator;
 
 	@Value("${kakao.client-id}")
 	private String clientId;
@@ -100,7 +106,7 @@ public class KakaoApiService {
 
 	//TODO : 결과 확인을 위해 string으로 반환 추후에 void로 변환
 	@Transactional
-	public String kakaoLoginProcess(String code) {
+	public LoginResponseDto kakaoLoginProcess(String code) {
 		Map<String, Object> tokenMap = getKakaoToken(code);
 		String accessToken = (String)tokenMap.get("access_token");
 		String refreshToken = (String)tokenMap.get("refresh_token");
@@ -126,8 +132,10 @@ public class KakaoApiService {
 		}
 
 		String email = (String)kakaoAccount.get("email");
-		String nickname = (String)profile.get("nickname");
-		String profileImage = (String)profile.get("profile_image_url");
+		String nickname = nicknameGenerator.generate("ko");
+		// String nickname = (String)profile.get("nickname");
+		// profile 추가시 사용
+		// String profileImage = (String)profile.get("profile_image_url");
 
 		if (email == null || nickname == null) {
 			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
@@ -136,20 +144,21 @@ public class KakaoApiService {
 		Optional<Member> existingMember = memberRepository.findByEmail(email);
 		if (existingMember.isPresent()) {
 			saveOauthToken(existingMember.get().getId(), accessToken, refreshToken, accessExpiresAt, refreshExpiresAt);
-			return "로그인 성공";
+
+			return kakaoLoginResponseToken(email);
 		}
 
 		Member newMember = Member.builder()
 			.email(email)
 			.nickname(nickname)
-			.profile(profileImage)
 			.provider(Provider.KAKAO)
+			// .profile(profileImage)
 			.build();
 
 		memberRepository.save(newMember);
 		saveOauthToken(newMember.getId(), accessToken, refreshToken, accessExpiresAt, refreshExpiresAt);
 
-		return "회원가입 성공";
+		return kakaoLoginResponseToken(email);
 	}
 
 	private void saveOauthToken(Long memberId, String accessToken, String refreshToken, LocalDateTime expiresAt,
@@ -163,5 +172,13 @@ public class KakaoApiService {
 			.build();
 
 		oauthTokenRepository.save(oauthToken);
+	}
+
+	public LoginResponseDto kakaoLoginResponseToken(String email) {
+
+		Member member = memberRepository.findByEmailAndIsWithdrawnIsFalse(email)
+			.orElseThrow(() -> new OsaekException(USER_EMAIL_NOT_FOUND));
+
+		return authService.createJwtToken(member);
 	}
 }

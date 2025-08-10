@@ -120,6 +120,6 @@ public class NicknameGenerator {
 		String adjective = adjectiveRepository.findRandomByLangCode(langCode);
 		String animal = animalRepository.findRandomByLangCode(langCode);
 
-		return vibe + adjective + " " + animal;
+		return vibe + " " + adjective + " " + animal;
 	}
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CreateUserRequestDto {
-	
+
 	@Pattern(
 		regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
 		message = "{validation.email.pattern}"
@@ -18,8 +18,6 @@ public class CreateUserRequestDto {
 	@NotBlank(message = "{validation.email.required}")
 	@Size(max = 256, message = "{validation.email.size}")
 	private String email;
-
-	private String nickname;
 
 	@NotBlank(message = "{validation.password.required}")
 	@Size(min = 8, message = "{validation.password.size}")

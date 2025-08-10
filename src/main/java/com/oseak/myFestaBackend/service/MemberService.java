@@ -15,6 +15,7 @@ import com.oseak.myFestaBackend.dto.member.WithdrawMemberResponseDto;
 import com.oseak.myFestaBackend.entity.Member;
 import com.oseak.myFestaBackend.entity.MemberPassword;
 import com.oseak.myFestaBackend.entity.enums.Provider;
+import com.oseak.myFestaBackend.generator.NicknameGenerator;
 import com.oseak.myFestaBackend.repository.MemberPasswordRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
@@ -29,6 +30,7 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	private final MemberPasswordRepository memberPasswordRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final NicknameGenerator nicknameGenerator;
 
 	// 로컬 회원가입 로직
 	@Transactional
@@ -38,9 +40,11 @@ public class MemberService {
 			throw new OsaekException(USER_EMAIL_DUPLICATE);
 		}
 
+		String nickname = nicknameGenerator.generate("ko");
+
 		Member member = Member.builder()
 			.email(request.getEmail())
-			.nickname(request.getNickname())
+			.nickname(nickname)
 			.provider(Provider.LOCAL)
 			.build();
 		Member savedMember = memberRepository.save(member);
@@ -84,7 +88,7 @@ public class MemberService {
 			.orElseThrow(() -> new OsaekException(USER_ID_NOT_FOUND));
 
 		MemberPassword memberPassword = memberPasswordRepository.findByMemberId(memberId)
-			.orElseThrow(() -> new OsaekException(PASSWORD_NOT_FOUND));
+			.orElseThrow(() -> new OsaekException(OAUTH_PASSWORD_CANT_CHANGE));
 
 		if (!passwordEncoder.matches(request.getCurrentPassword(), memberPassword.getPassword())) {
 			throw new OsaekException(PASSWORD_NOT_CORRECT);
