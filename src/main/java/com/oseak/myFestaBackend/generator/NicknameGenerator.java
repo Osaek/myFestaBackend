@@ -1,5 +1,7 @@
 package com.oseak.myFestaBackend.generator;
 
+import static com.oseak.myFestaBackend.common.exception.code.ClientErrorCode.*;
+
 import java.util.Random;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,13 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 닉네임을 랜덤으로 조합하여 생성하는 유틸성 컴포넌트.
- *
  * - vibe + adjective + animal 형태로 조합된 축제 느낌의 닉네임 생성
  * - 예: "불꽃설레는 여우", "여름빛흔들리는 고양이"
- *
  * - 생성된 닉네임은 `generated_nickname` 테이블에 저장 (UNIQUE 제약)
  * - 동일한 닉네임 충돌 시 최대 30회까지 재시도
- *
  * - 30회 모두 실패 시, 기존 닉네임에 2자리 숫자 접미사(랜덤) 붙여 생성
  * - 예: "불꽃설레는 여우72"
  * - 접미사 충돌 시 무한 재시도
@@ -46,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NicknameGenerator {
 
 	private static final int MAX_ATTEMPTS = 30;
+	private static final int FALLBACK_MAX_ATTEMPTS = 300;
 	private static final int MAX_NICKNAME_LENGTH = 32;
 
 	private final NicknameVibeRepository vibeRepository;
@@ -83,18 +83,23 @@ public class NicknameGenerator {
 				return nickname;
 
 			} catch (DataIntegrityViolationException e) {
-				log.warn("[닉네임 충돌] 중복된 닉네임 '{}', {}회 시도 중", nickname, i + 1);
+				log.debug("[닉네임 충돌] 중복된 닉네임 '{}', {}회 시도 중", nickname, i + 1);
 			}
 
 			baseNickname = nickname;
 		}
 
-		// fallback: 접미사 붙이기 (중복 피할 때까지 무한 시도)
-		while (true) {
-			String suffix = String.format("%02d", random.nextInt(100)); // 00~99
+		// fallback: 접미사 붙이기 (중복 피할 때까지 최대 300회 시도)
+		for (int i = 0; i < FALLBACK_MAX_ATTEMPTS; ++i) {
+			String suffix = String.format("%03d", random.nextInt(999) + 1); // 001~999
 			String nicknameWithSuffix = baseNickname + suffix;
 
-			// 32자 제한 초과 방지
+			// 길이 초과 시: 먼저 공백 제거 후 접미사 보존 시도
+			if (nicknameWithSuffix.length() > MAX_NICKNAME_LENGTH) {
+				nicknameWithSuffix = baseNickname.replace(" ", "") + suffix;
+			}
+
+			// 공백 제거 후에도 길다면 잘라냄 (접미사 포함 우선)
 			if (nicknameWithSuffix.length() > MAX_NICKNAME_LENGTH) {
 				nicknameWithSuffix = nicknameWithSuffix.substring(0, MAX_NICKNAME_LENGTH);
 			}
@@ -106,13 +111,16 @@ public class NicknameGenerator {
 						.build()
 				);
 
-				log.info("[닉네임 fallback] 접미사 '{}' 붙여 생성 성공 → {}", suffix, nicknameWithSuffix);
+				log.debug("[닉네임 fallback] 접미사 '{}' 붙여 생성 성공 → {}", suffix, nicknameWithSuffix);
 				return nicknameWithSuffix;
 
 			} catch (DataIntegrityViolationException e) {
-				log.warn("[닉네임 fallback 충돌] '{}'", nicknameWithSuffix);
+				log.debug("[닉네임 fallback 충돌] '{}'", nicknameWithSuffix);
 			}
 		}
+
+		throw new OsaekException(USER_NICKNAME_GENERATION_ATTEMPT_EXCEEDED);
+
 	}
 
 	private String buildNickname(String langCode) {
