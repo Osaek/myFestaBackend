@@ -80,7 +80,7 @@ public class JwtUtil {
 	}
 
 	// 토큰에서 모든 클레임 추출
-	private Claims getAllClaimsFromToken(String token) {
+	public Claims getAllClaimsFromToken(String token) {
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(getSigningKey())
@@ -88,7 +88,7 @@ public class JwtUtil {
 				.parseClaimsJws(token)
 				.getBody();
 		} catch (ExpiredJwtException e) {
-			throw new OsaekException(JWT_TOKEN_RETIRED, e);
+			return e.getClaims();
 		} catch (UnsupportedJwtException | MalformedJwtException e) {
 			throw new OsaekException(JWT_TOKEN_INVALID, e);
 		} catch (SecurityException e) {
@@ -117,7 +117,7 @@ public class JwtUtil {
 	// Member 정보로 리프레시 토큰 생성
 	public String generateRefreshToken(Member member) {
 		Map<String, Object> claims = new HashMap<>();
-		claims.put("memberId", member.getEmail());
+		claims.put("email", member.getEmail());
 		claims.put("nickname", member.getNickname());
 		claims.put("provider", member.getProvider().name());
 		claims.put("tokenType", "REFRESH");
@@ -254,12 +254,16 @@ public class JwtUtil {
 		return null;
 	}
 
-	public String refreshAccessToken(String refreshToken) {
+	public String refreshAccessToken(String refreshToken, Long memberId) {
 		if (!validateToken(refreshToken) || !isRefreshToken(refreshToken)) {
 			throw new OsaekException(JWT_REFRESH_TOKEN_INVALID);
 		}
 
-		Long memberId = getMemberIdFromToken(refreshToken);
+		Long tokenMemberId = getMemberIdFromToken(refreshToken);
+		if (!tokenMemberId.equals(memberId)) {
+			throw new OsaekException(JWT_REFRESH_TOKEN_INVALID);
+		}
+
 		String email = getEmailFromToken(refreshToken);
 		String nickname = getNicknameFromToken(refreshToken);
 		Provider provider = getProviderFromToken(refreshToken);

@@ -40,15 +40,18 @@ public enum ClientErrorCode implements BaseErrorCode {
 	USER_UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "OSAEK-10008", "user.unauthorized"),
 
 	// jwt 토큰 관련
-	JWT_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10010", "jwt.refresh_token.invalid"),
-	JWT_TOKEN_RETIRED(HttpStatus.UNAUTHORIZED, "OSAEK-10011", "jwt.token.retired"),
-	JWT_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10012", "jwt.token.invalid"),
-	JWT_TOKEN_SIGN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10013", "jwt.token.sign_invalid"),
-	JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10014", "jwt.token.not_found"),
+	JWT_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10110", "jwt.refresh_token.invalid"),
+	JWT_REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10111", "jwt.refresh_token.not_found"),
+	JWT_REFRESH_TOKEN_EXPIRED(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10112", "jwt.refresh_token.expired"),
+	JWT_TOKEN_RETIRED(HttpStatus.UNAUTHORIZED, "OSAEK-10113", "jwt.token.retired"),
+	JWT_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10114", "jwt.token.invalid"),
+	JWT_TOKEN_SIGN_INVALID(HttpStatus.UNAUTHORIZED, "OSAEK-10115", "jwt.token.sign_invalid"),
+	JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10116", "jwt.token.not_found"),
 
 	// 패스워드 관련
-	PASSWORD_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10015", "password.not_found"),
-	PASSWORD_NOT_CORRECT(HttpStatus.UNAUTHORIZED, "OSAEK-10016", "password.not_correct"),
+	PASSWORD_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10215", "password.not_found"),
+	PASSWORD_NOT_CORRECT(HttpStatus.UNAUTHORIZED, "OSAEK-10216", "password.not_correct"),
+	OAUTH_PASSWORD_CANT_CHANGE(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10217", "password.cant_change"),
 	;
 
 	private final HttpStatus httpStatus;
