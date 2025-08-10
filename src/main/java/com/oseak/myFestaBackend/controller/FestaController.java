@@ -114,7 +114,6 @@ public class FestaController {
 		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.from(festivals);
 
 		return ResponseEntity.ok(CommonResponse.success(festivalSearchResponse));
-
 	}
 
 	@GetMapping("/{id}/detail")
