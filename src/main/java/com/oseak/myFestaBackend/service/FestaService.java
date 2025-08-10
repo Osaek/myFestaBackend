@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,6 +23,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
+import com.oseak.myFestaBackend.dto.FestaSimpleDto;
+import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.FestaRepository;
@@ -45,6 +48,7 @@ public class FestaService {
 	@Value("${tourapi.service-key}")
 	private String serviceKey;
 
+	@Transactional
 	public void fetchAndSaveFestivals(String eventStartDate, Integer areaCode) {
 		try {
 			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/searchFestival2")
@@ -86,12 +90,14 @@ public class FestaService {
 
 				FestaStatus status = getStatusByDate(startAt, endAt);
 				Map<String, String> detailMap = fetchFestivalDetails(contentId, contentTypeId);
+				Map<String, String> introMap = fetchFestivalIntro(contentId, contentTypeId);
 
 				Optional<Festa> optionalFesta = festaRepository.findByContentId(contentId);
 				if (optionalFesta.isPresent()) {
 					log.info("기존 '{}' 행사 (contentId: {}) 업데이트 실행", title, contentId);
 					Festa festa = optionalFesta.get();
 					festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
+					festa.updateIntro(introMap.get("playtime"), introMap.get("usetimefestival"));
 					festa.updateStatus(status);
 					festaRepository.save(festa);
 				} else {
@@ -107,8 +113,8 @@ public class FestaService {
 						.areaCode(item.optInt("areacode"))
 						.subAreaCode(item.optInt("sigungucode"))
 						.imageUrl(item.optString("firstimage"))
-						.openTime(item.optString("playtime"))
-						.feeInfo(item.optString("usetimefestival"))
+						.openTime(introMap.get("playtime"))
+						.feeInfo(introMap.get("usetimefestival"))
 						.festaStatus(status)
 						.overview(detailMap.get("overview"))
 						.description(detailMap.get("description"))
@@ -171,6 +177,51 @@ public class FestaService {
 		return result;
 	}
 
+	private Map<String, String> fetchFestivalIntro(Long contentId, Long contentTypeId) {
+		Map<String, String> result = new HashMap<>();
+		try {
+			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/detailIntro2")
+				.queryParam("MobileOS", "ETC")
+				.queryParam("MobileApp", UriUtils.encode("오색", StandardCharsets.UTF_8))
+				.queryParam("_type", "json")
+				.queryParam("contentId", contentId)
+				.queryParam("contentTypeId", contentTypeId)
+				.queryParam("serviceKey", serviceKey)
+				.build(true)
+				.toUri();
+
+			String response = webClient.get()
+				.uri(uri)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			JSONArray items = new JSONObject(response)
+				.getJSONObject("response")
+				.getJSONObject("body")
+				.getJSONObject("items")
+				.optJSONArray("item");
+
+			if (items != null && items.length() > 0) {
+				JSONObject intro = items.getJSONObject(0);
+				String playtime = optStringOrNull(intro, "playtime");
+				String fee = optStringOrNull(intro, "usetimefestival");
+				result.put("playtime", playtime);
+				result.put("usetimefestival", fee);
+			}
+		} catch (WebClientResponseException e) {
+			throw new OsaekException(ServerErrorCode.SERVICE_UNAVAILABLE);
+		} catch (Exception e) {
+			throw new OsaekException(ServerErrorCode.MALFORMED_RESPONSE);
+		}
+		return result;
+	}
+
+	private String optStringOrNull(JSONObject o, String key) {
+		String v = o.optString(key, null);
+		return (v == null || v.isBlank()) ? null : v;
+	}
+
 	private LocalDateTime parseDate(String dateStr) {
 		try {
 			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE).atStartOfDay();
@@ -224,4 +275,42 @@ public class FestaService {
 	/*TODO : festa 정보 저장될 때 festa_statistic도 같이 만들어줘야함.
 		user_like좀 넣고 festa_statistic 도 넣고 해야 추천 API만들 듯.
 	*/
+
+	public List<FestaSimpleDto> findNearbyFesta(double latitude, double longitude, int distanceKm) {
+		if (!List.of(1, 5, 10, 20).contains(distanceKm)) {
+			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
+		}
+
+		return festaRepository.findByDistance(latitude, longitude, distanceKm).stream()
+			.map(FestaSimpleDto::from)
+			.toList();
+	}
+
+	public List<FestaSummaryDto> getFestaSummariesByContentIds(List<Long> contentIds) {
+		List<Festa> festas = festaRepository.findAllByContentIdIn(contentIds);
+
+		List<Long> foundIds = festas.stream()
+			.map(Festa::getContentId)
+			.toList();
+
+		List<Long> missingIds = contentIds.stream()
+			.filter(id -> !foundIds.contains(id))
+			.toList();
+
+		if (!missingIds.isEmpty()) {
+			throw new OsaekException(ServerErrorCode.FESTA_NOT_FOUND);
+		}
+
+		return festas.stream()
+			.map(FestaSummaryDto::from)
+			.toList();
+	}
+
+	public List<FestaSimpleDto> getRandomFestivals(int count) {
+		List<Festa> randomFestivals = festaRepository.findRandomFestivals(count);
+		return randomFestivals.stream()
+			.map(FestaSimpleDto::from)
+			.toList();
+	}
+
 }

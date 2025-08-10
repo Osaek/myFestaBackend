@@ -30,7 +30,8 @@ public enum ServerErrorCode implements BaseErrorCode {
 	TOKEN_REQUEST_FAILED(HttpStatus.BAD_GATEWAY, "OSAEK-00008", "server.token_request_failed"),
 	USER_INFO_REQUEST_FAILED(HttpStatus.BAD_GATEWAY, "OSAEK-00009", "server.user_info_request_failed"),
 	FESTA_STATUS_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-00010", "server.festa_status_update_failed"),
-	FESTA_FETCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-00011", "server.festa_fetch_failed");
+	FESTA_FETCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-00011", "server.festa_fetch_failed"),
+	FESTA_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-00012", "server.festa_not_found");
 
 	private final HttpStatus httpStatus;
 	private final String code;
