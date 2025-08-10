@@ -52,7 +52,9 @@ public enum ClientErrorCode implements BaseErrorCode {
 	PASSWORD_NOT_FOUND(HttpStatus.UNAUTHORIZED, "OSAEK-10215", "password.not_found"),
 	PASSWORD_NOT_CORRECT(HttpStatus.UNAUTHORIZED, "OSAEK-10216", "password.not_correct"),
 	OAUTH_PASSWORD_CANT_CHANGE(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10217", "password.cant_change"),
-	;
+
+	// 지역 코드 관련
+	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found");
 
 	private final HttpStatus httpStatus;
 	private final String code;
