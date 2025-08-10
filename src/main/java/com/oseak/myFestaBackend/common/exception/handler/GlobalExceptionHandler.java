@@ -3,11 +3,15 @@ package com.oseak.myFestaBackend.common.exception.handler;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.BaseErrorCode;
+import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.common.exception.util.MessageUtil;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
@@ -20,7 +24,6 @@ import lombok.RequiredArgsConstructor;
  *
  * <p>컨트롤러 전반에서 발생하는 예외를 공통 포맷으로 처리하여
  * CommonResponse 형태로 반환합니다.</p>
- *
  */
 @Schema(name = "GlobalExceptionHandler", description = "전역 예외 처리 핸들러")
 @RestControllerAdvice
@@ -61,6 +64,37 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * 검증 예외를 처리합니다.
+	 *
+	 * @param ex 발생한 예외
+	 *           증@return HTTP 400 상태와 함께 표준 CommonResponse를 반환
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<CommonResponse<Void>> handleValidationExceptions(
+		MethodArgumentNotValidException ex
+	) {
+		ClientErrorCode errorCode = ClientErrorCode.INVALID_INPUT_VALUE;
+
+		String localizedMessage = messageUtil.getMessage(errorCode.getMessageKey());
+
+		String validMessage = ex.getBindingResult()
+			.getFieldErrors()
+			.stream()
+			.findFirst()
+			.map(FieldError::getDefaultMessage)
+			.filter(StringUtils::hasText)
+			.orElse(localizedMessage);
+
+		if (validMessage.startsWith("{") && validMessage.endsWith("}")) {
+			validMessage = localizedMessage;
+		}
+
+		return ResponseEntity.badRequest().body(
+			CommonResponse.fail(errorCode.getCode(), validMessage)
+		);
+	}
+
+	/**
 	 * 공통 에러 응답을 생성합니다.
 	 *
 	 * @param errorCode 에러 코드 (BaseErrorCode 구현체)
@@ -80,7 +114,7 @@ public class GlobalExceptionHandler {
 	/**
 	 * 공통 에러 응답을 생성합니다.
 	 *
-	 * @param errorCode 에러 코드 (BaseErrorCode 구현체)
+	 * @param errorCode     에러 코드 (BaseErrorCode 구현체)
 	 * @param customMessage 지정한 에러 메시지
 	 * @return 응답 엔티티
 	 */
