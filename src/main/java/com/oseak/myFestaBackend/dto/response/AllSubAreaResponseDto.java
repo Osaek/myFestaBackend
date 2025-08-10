@@ -16,14 +16,14 @@ import lombok.NoArgsConstructor;
 public class AllSubAreaResponseDto {
 	@Schema(description = "상위지역코드", example = "1")
 	Integer areaCode;
-	
+
 	@Schema(description = "하위지역명", example = "강남")
 	String subAreaName;
 
 	@Schema(description = "하위지역코드", example = "1")
 	Integer subAreaCode;
 
-	public static AllSubAreaResponseDto of(SubArea subArea) {
+	public static AllSubAreaResponseDto from(SubArea subArea) {
 		return AllSubAreaResponseDto.builder()
 			.areaCode(subArea.getId().getAreaCode())
 			.subAreaCode(subArea.getId().getSubAreaCode())
