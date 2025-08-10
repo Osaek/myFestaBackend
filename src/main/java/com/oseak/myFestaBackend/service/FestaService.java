@@ -1,5 +1,7 @@
 package com.oseak.myFestaBackend.service;
 
+import static com.oseak.myFestaBackend.common.exception.code.ServerErrorCode.*;
+
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -31,6 +33,7 @@ import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
+import com.oseak.myFestaBackend.dto.response.FestivalDetailResponseDto;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
@@ -328,6 +331,27 @@ public class FestaService {
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
 		return page.map(FestivalSearchItem::from);
+	}
+
+	/**
+	 * 축제 상세 정보 조회
+	 *
+	 * @param id 축제 ID
+	 * @return FestivalDetailResponseDto 축제 상세 정보
+	 */
+	public FestivalDetailResponseDto getDetail(Long id) {
+		log.debug("축제 상세 정보 조회 시작: id={}", id);
+
+		Festa festival = festaRepository.findById(id)
+			.orElseThrow(() -> {
+				log.warn("축제를 찾을 수 없습니다: id={}", id);
+				return new OsaekException(FESTA_NOT_FOUND);
+			});
+
+		FestivalDetailResponseDto responseDto = FestivalDetailResponseDto.from(festival);
+
+		log.debug("축제 상세 정보 조회 완료: id={}, name={}", id, festival.getFestaName());
+		return responseDto;
 	}
 
 }

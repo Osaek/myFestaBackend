@@ -8,14 +8,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.oseak.myFestaBackend.common.exception.OsaekException;
+import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
+import com.oseak.myFestaBackend.dto.response.FestivalDetailResponseDto;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchResponse;
 import com.oseak.myFestaBackend.service.FestaService;
@@ -100,7 +104,7 @@ public class FestaController {
 		description = "검색 성공",
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
-	public CommonResponse<FestivalSearchResponse> searchFestivals(
+	public ResponseEntity<CommonResponse<FestivalSearchResponse>> searchFestivals(
 		@Parameter(description = "축제 검색 조건") @ModelAttribute FestivalSearchRequest request) {
 		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
 			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
@@ -109,14 +113,52 @@ public class FestaController {
 		Page<FestivalSearchItem> festivals = festaService.search(request);
 		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.from(festivals);
 
-		return CommonResponse.success(festivalSearchResponse);
+		return ResponseEntity.ok(CommonResponse.success(festivalSearchResponse));
+
 	}
 
+	@GetMapping("/{id}/detail")
+	@Operation(summary = "축제 상세 조회", description = "단건의 축제 상세 정보를 조회합니다.")
+	@ApiResponse(
+		responseCode = "200",
+		description = "조회 성공",
+		content = @Content(schema = @Schema(implementation = CommonResponse.class))
+	)
+	public ResponseEntity<CommonResponse<FestivalDetailResponseDto>> getFestivalDetail(
+		@Parameter(
+			description = "조회할 축제의 ID",
+			required = true,
+			example = "1"
+		)
+		@PathVariable Long id) {
+		log.debug("상세 조회 요청: id={}", id);
+		validateFestivalId(id);
 
-	// @GetMapping("/detail")
-	// public ResponseEntity<FestaDetailDto> getDetailFestivals(@RequestParam Long contentId) {
-	// 	return ResponseEntity.ok(festaService.getDetailFestival(contentId));
-	// }
+		FestivalDetailResponseDto festivalDetail = festaService.getDetail(id);
 
+		return ResponseEntity.ok(CommonResponse.success(festivalDetail));
+	}
+
+	/**
+	 * 축제 ID 유효성 검증
+	 *
+	 * @param id 검증할 축제 ID
+	 * @throws IllegalArgumentException ID가 null이거나 0 이하인 경우
+	 */
+	private void validateFestivalId(Long id) {
+		log.debug("축제 ID 유효성 검증 시작: id={}", id);
+
+		if (id == null) {
+			log.debug("축제 ID가 null입니다");
+			throw new OsaekException(ClientErrorCode.FESTIVAL_ID_NULL);
+		}
+
+		if (id <= 0) {
+			log.debug("유효하지 않은 축제 ID입니다: id={}", id);
+			throw new OsaekException(ClientErrorCode.FESTIVAL_ID_INVALID);
+		}
+
+		log.debug("축제 ID 유효성 검증 완료: id={}", id);
+	}
 
 }
