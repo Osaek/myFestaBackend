@@ -1,6 +1,6 @@
 package com.oseak.myFestaBackend.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.oseak.myFestaBackend.entity.Festa;
 
@@ -14,8 +14,8 @@ public class FestaSummaryDto {
 	private String festaName;
 	private String imageUrl;
 	private String festaAddress;
-	private LocalDateTime festaStartAt;
-	private LocalDateTime festaEndAt;
+	private LocalDate festaStartAt;
+	private LocalDate festaEndAt;
 	private String overview;
 
 	public static FestaSummaryDto from(Festa festa) {

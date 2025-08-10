@@ -3,7 +3,6 @@ package com.oseak.myFestaBackend.service;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -83,8 +82,8 @@ public class FestaService {
 			for (int i = 0; i < items.length(); i++) {
 				JSONObject item = items.getJSONObject(i);
 				String title = item.optString("title");
-				LocalDateTime startAt = parseDate(item.optString("eventstartdate"));
-				LocalDateTime endAt = parseDate(item.optString("eventenddate"));
+				LocalDate startAt = parseDate(item.optString("eventstartdate"));
+				LocalDate endAt = parseDate(item.optString("eventenddate"));
 				Long contentId = item.optLong("contentid");
 				Long contentTypeId = item.optLong("contenttypeid");
 
@@ -222,22 +221,22 @@ public class FestaService {
 		return (v == null || v.isBlank()) ? null : v;
 	}
 
-	private LocalDateTime parseDate(String dateStr) {
+	private LocalDate parseDate(String dateStr) {
 		try {
-			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE).atStartOfDay();
+			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	private FestaStatus getStatusByDate(LocalDateTime start, LocalDateTime end) {
+	private FestaStatus getStatusByDate(LocalDate start, LocalDate end) {
 		LocalDate today = LocalDate.now();
 		if (start == null || end == null) {
 			return FestaStatus.SCHEDULED;
 		}
-		if (today.isBefore(start.toLocalDate())) {
+		if (today.isBefore(start)) {
 			return FestaStatus.SCHEDULED;
-		} else if (!today.isAfter(end.toLocalDate())) {
+		} else if (!today.isAfter(end)) {
 			return FestaStatus.ONGOING;
 		} else {
 			return FestaStatus.COMPLETED;
@@ -246,23 +245,12 @@ public class FestaService {
 
 	@Transactional
 	public void updateAllFestaStatus() {
-		LocalDate today = LocalDate.now();
 
 		festaRepository.findAll().forEach(festa -> {
-			LocalDate start = festa.getFestaStartAt() != null ? festa.getFestaStartAt().toLocalDate() : null;
-			LocalDate end = festa.getFestaEndAt() != null ? festa.getFestaEndAt().toLocalDate() : null;
+			LocalDate start = festa.getFestaStartAt();
+			LocalDate end = festa.getFestaEndAt();
 
-			FestaStatus newStatus;
-
-			if (start == null || end == null) {
-				newStatus = FestaStatus.SCHEDULED; // 기본값 또는 예외 처리 가능
-			} else if (today.isBefore(start)) {
-				newStatus = FestaStatus.SCHEDULED;
-			} else if (!today.isAfter(end)) {
-				newStatus = FestaStatus.ONGOING;
-			} else {
-				newStatus = FestaStatus.COMPLETED;
-			}
+			FestaStatus newStatus = getStatusByDate(start, end);
 
 			if (festa.getFestaStatus() != newStatus) {
 				festa.updateStatus(newStatus);
