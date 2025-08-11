@@ -321,8 +321,8 @@ public class FestaService {
 		return page.map(FestivalSearchItem::from);
 	}
 
-	public List<DevPickFesta> getDeveloperPicksRaw(int count) {
-		return devPickFestaRepository.findAll(PageRequest.of(0, count)).getContent(); // 정렬 없음
+	public List<DevPickFesta> getDeveloperPicks(int count) {
+		return devPickFestaRepository.pickRandom(count);
 	}
 
 }

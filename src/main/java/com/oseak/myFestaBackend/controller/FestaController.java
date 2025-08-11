@@ -131,7 +131,7 @@ public class FestaController {
 	@GetMapping("/picks")
 	public ResponseEntity<CommonResponse<List<DevPickFesta>>> getDeveloperPicks(
 		@RequestParam(defaultValue = "2") int count) {
-		return ResponseEntity.ok(CommonResponse.success(festaService.getDeveloperPicksRaw(count)));
+		return ResponseEntity.ok(CommonResponse.success(festaService.getDeveloperPicks(count)));
 	}
 
 }
