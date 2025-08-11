@@ -66,7 +66,7 @@ public class FestaService {
 				.queryParam("MobileApp", UriUtils.encode("오색", StandardCharsets.UTF_8))
 				.queryParam("_type", "json")
 				.queryParam("eventStartDate", eventStartDate)
-				.queryParam("numOfRows", 200)
+				.queryParam("numOfRows", 1000)
 				.queryParam("serviceKey", serviceKey)
 				.queryParamIfPresent("areaCode", Optional.ofNullable(areaCode))
 				.build(true)
