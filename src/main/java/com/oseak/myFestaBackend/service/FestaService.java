@@ -31,8 +31,10 @@ import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
+import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
+import com.oseak.myFestaBackend.repository.DevPickFestaRepository;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 import com.oseak.myFestaBackend.repository.FestivalSpecification;
 
@@ -46,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FestaService {
 
 	private final FestaRepository festaRepository;
+	private final DevPickFestaRepository devPickFestaRepository;
 	private final WebClient webClient;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -316,6 +319,10 @@ public class FestaService {
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
 		return page.map(FestivalSearchItem::from);
+	}
+
+	public List<DevPickFesta> getDeveloperPicksRaw(int count) {
+		return devPickFestaRepository.findAll(PageRequest.of(0, count)).getContent(); // 정렬 없음
 	}
 
 }
