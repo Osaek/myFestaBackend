@@ -24,14 +24,14 @@ public class FestaBatchScheduler {
 
 	//TODO : 시간 변경필요
 	@Scheduled(cron = "0 25 1 * * *")
-	public void fetchAndSaveFestivalsBatch() {
+	public void fetchAndSaveFestaBatch() {
 		log.info("축제 정보 수집 배치 정상 시작");
 		String eventStartDate = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
 		areaRepository.findAll().forEach(area -> {
 			Integer areaCode = area.getAreaCode();
 			try {
 				log.info("지역 코드 {} 축제 수집 시작", areaCode);
-				festaService.fetchAndSaveFestivals(eventStartDate, areaCode);
+				festaService.fetchAndSaveFestas(eventStartDate, areaCode);
 			} catch (Exception e) {
 				log.error("지역코드 {} 수집 중 오류 발생", areaCode, e);
 				throw new OsaekException(ServerErrorCode.FESTA_FETCH_FAILED);

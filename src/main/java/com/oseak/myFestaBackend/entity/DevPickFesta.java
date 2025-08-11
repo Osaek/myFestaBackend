@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 public class DevPickFesta {
 
 	@Id
-	@Column(name = "content_id")
-	private Long contentId;
+	@Column(name = "festa_id")
+	private Long festaId;
 
 	@Column(name = "festa_name", nullable = false)
 	private String festaName;
@@ -29,8 +29,8 @@ public class DevPickFesta {
 	private String imageUrl;
 
 	@Builder
-	public DevPickFesta(Long contentId, String festaName, String tagline, String imageUrl) {
-		this.contentId = contentId;
+	public DevPickFesta(Long festaId, String festaName, String tagline, String imageUrl) {
+		this.festaId = festaId;
 		this.festaName = festaName;
 		this.tagline = tagline;
 		this.imageUrl = imageUrl;

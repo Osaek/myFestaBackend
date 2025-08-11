@@ -59,8 +59,8 @@ public enum ClientErrorCode implements BaseErrorCode {
 	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-30001", "area.code.not_found"),
 
 	// 축제 관련
-	FESTIVAL_ID_NULL(HttpStatus.BAD_REQUEST, "OSAEK-30002", "festival.id.null"),
-	FESTIVAL_ID_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-30003", "festival.id.invalid");
+	FESTA_ID_NULL(HttpStatus.BAD_REQUEST, "OSAEK-30002", "festa.id.null"),
+	FESTA_ID_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-30003", "festa.id.invalid");
 
 	private final HttpStatus httpStatus;
 	private final String code;
