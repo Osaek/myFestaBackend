@@ -12,6 +12,11 @@ import java.util.Optional;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -24,9 +29,12 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
+import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
+import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.FestaRepository;
+import com.oseak.myFestaBackend.repository.FestivalSpecification;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -299,6 +307,15 @@ public class FestaService {
 		return randomFestivals.stream()
 			.map(FestaSimpleDto::from)
 			.toList();
+	}
+
+	public Page<FestivalSearchItem> search(FestivalSearchRequest request) {
+		Specification<Festa> spec = FestivalSpecification.createSpecification(request);
+		Pageable pageable = PageRequest.of(request.getValidPage(), request.getValidSize(),
+			Sort.by(Sort.Direction.ASC, "festaStartAt"));
+
+		Page<Festa> page = festaRepository.findAll(spec, pageable);
+		return page.map(FestivalSearchItem::from);
 	}
 
 }

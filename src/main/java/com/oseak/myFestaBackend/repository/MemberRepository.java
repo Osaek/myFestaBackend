@@ -8,4 +8,10 @@ import com.oseak.myFestaBackend.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 	Optional<Member> findByEmail(String email);
+
+	Optional<Member> findByEmailAndIsWithdrawnIsFalse(String email);
+
+	Optional<Member> findByIdAndIsWithdrawnIsFalse(Long id);
+
+	boolean existsByEmailAndIsWithdrawnIsFalse(String email);
 }
