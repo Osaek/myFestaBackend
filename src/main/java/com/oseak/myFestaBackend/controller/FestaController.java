@@ -18,10 +18,10 @@ import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
-import com.oseak.myFestaBackend.dto.response.FestivalDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
-import com.oseak.myFestaBackend.dto.response.FestivalSearchResponse;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
+import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
+import com.oseak.myFestaBackend.dto.response.FestaSearchItem;
+import com.oseak.myFestaBackend.dto.response.FestaSearchResponse;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.service.FestaService;
 
@@ -36,16 +36,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/festival")
+@RequestMapping("/festas")
 public class FestaController {
 
 	private final FestaService festaService;
 
 	//TODO : 배치로 전환 완료. 테스트용 API
 	@GetMapping("/fetch")
-	public ResponseEntity<String> fetchAndSaveFestivals(@RequestParam(required = false) Integer areaCode) {
+	public ResponseEntity<String> fetchAndSaveFestas(@RequestParam(required = false) Integer areaCode) {
 		String eventStartDate = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-		festaService.fetchAndSaveFestivals(eventStartDate, areaCode);
+		festaService.fetchAndSaveFestas(eventStartDate, areaCode);
 		return ResponseEntity.ok("축제 데이터 수집 및 저장 완료");
 	}
 
@@ -62,7 +62,7 @@ public class FestaController {
 		}
 	)
 	@GetMapping("/nearby")
-	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getNearbyFestivalIds(@RequestParam double lat,
+	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getNearbyFestasIds(@RequestParam double lat,
 		@RequestParam double lng,
 		@RequestParam int distance) {
 		return ResponseEntity.ok(CommonResponse.success(festaService.findNearbyFesta(lat, lng, distance)));
@@ -70,18 +70,18 @@ public class FestaController {
 
 	@Operation(
 		summary = "축제 요약 정보 조회",
-		description = "contentId 리스트를 받아 해당하는 축제들의 요약 정보를 반환합니다.",
+		description = "festaId 리스트를 받아 해당하는 축제들의 요약 정보를 반환합니다.",
 		parameters = {
-			@Parameter(name = "ids", description = "축제 contentId 리스트", required = true, example = "12345,67890")
+			@Parameter(name = "festaIds", description = "축제 festaId 리스트", required = true, example = "12345,67890")
 		},
 		responses = {
 			@ApiResponse(responseCode = "200", description = "요약 정보 리스트 반환", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FestaSummaryDto.class)))
 		}
 	)
 	@GetMapping("/summary")
-	public ResponseEntity<CommonResponse<List<FestaSummaryDto>>> getFestivalSummaries(
-		@RequestParam List<Long> contentIds) {
-		return ResponseEntity.ok(CommonResponse.success(festaService.getFestaSummariesByContentIds(contentIds)));
+	public ResponseEntity<CommonResponse<List<FestaSummaryDto>>> getFestaSummaries(
+		@RequestParam List<Long> festaIds) {
+		return ResponseEntity.ok(CommonResponse.success(festaService.getFestaSummariesByFestaIds(festaIds)));
 	}
 
 	@Operation(
@@ -95,8 +95,8 @@ public class FestaController {
 		}
 	)
 	@GetMapping("/random")
-	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getRandomFestivals(@RequestParam int count) {
-		return ResponseEntity.ok(CommonResponse.success(festaService.getRandomFestivals(count)));
+	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getRandomFestas(@RequestParam int count) {
+		return ResponseEntity.ok(CommonResponse.success(festaService.getRandomFestas(count)));
 	}
 
 	@GetMapping()
@@ -106,59 +106,59 @@ public class FestaController {
 		description = "검색 성공",
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
-	public ResponseEntity<CommonResponse<FestivalSearchResponse>> searchFestivals(
-		@Parameter(description = "축제 검색 조건") @ModelAttribute FestivalSearchRequest request) {
+	public ResponseEntity<CommonResponse<FestaSearchResponse>> searchFestas(
+		@Parameter(description = "축제 검색 조건") @ModelAttribute FestaSearchRequest request) {
 		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
 			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
 
 		log.debug("전체 요청 객체: {}", request);
-		Page<FestivalSearchItem> festivals = festaService.search(request);
-		FestivalSearchResponse festivalSearchResponse = FestivalSearchResponse.from(festivals);
+		Page<FestaSearchItem> festas = festaService.search(request);
+		FestaSearchResponse festaSearchResponse = FestaSearchResponse.from(festas);
 
-		return ResponseEntity.ok(CommonResponse.success(festivalSearchResponse));
+		return ResponseEntity.ok(CommonResponse.success(festaSearchResponse));
 	}
 
-	@GetMapping("/{contentId}/detail")
+	@GetMapping("/{festaId}/detail")
 	@Operation(summary = "축제 상세 조회", description = "단건의 축제 상세 정보를 조회합니다.")
 	@ApiResponse(
 		responseCode = "200",
 		description = "조회 성공",
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
-	public ResponseEntity<CommonResponse<FestivalDetailResponseDto>> getFestivalDetail(
+	public ResponseEntity<CommonResponse<FestaDetailResponseDto>> getFestaDetail(
 		@Parameter(
 			description = "조회할 축제의 ID",
 			required = true,
-			example = "1"
+			example = "3481597"
 		)
-		@PathVariable Long contentId) {
-		log.debug("상세 조회 요청: id={}", contentId);
-		validateFestivalId(contentId);
+		@PathVariable Long festaId) {
+		log.debug("상세 조회 요청: id={}", festaId);
+		validateFesta(festaId);
 
-		FestivalDetailResponseDto festivalDetail = festaService.getDetail(contentId);
+		FestaDetailResponseDto festaDetail = festaService.getDetail(festaId);
 
-		return ResponseEntity.ok(CommonResponse.success(festivalDetail));
+		return ResponseEntity.ok(CommonResponse.success(festaDetail));
 	}
 
 	/**
 	 * 축제 ID 유효성 검증
 	 *
-	 * @param contentId 검증할 축제 ID
+	 * @param festaId 검증할 축제 ID
 	 */
-	private void validateFestivalId(Long contentId) {
-		log.debug("축제 ID 유효성 검증 시작: id={}", contentId);
+	private void validateFesta(Long festaId) {
+		log.debug("축제 ID 유효성 검증 시작: id={}", festaId);
 
-		if (contentId == null) {
+		if (festaId == null) {
 			log.debug("축제 ID가 null입니다");
-			throw new OsaekException(ClientErrorCode.FESTIVAL_ID_NULL);
+			throw new OsaekException(ClientErrorCode.FESTA_ID_NULL);
 		}
 
-		if (contentId <= 0) {
-			log.debug("유효하지 않은 축제 ID입니다: id={}", contentId);
-			throw new OsaekException(ClientErrorCode.FESTIVAL_ID_INVALID);
+		if (festaId <= 0) {
+			log.debug("유효하지 않은 축제 ID입니다: id={}", festaId);
+			throw new OsaekException(ClientErrorCode.FESTA_ID_INVALID);
 		}
 
-		log.debug("축제 ID 유효성 검증 완료: id={}", contentId);
+		log.debug("축제 ID 유효성 검증 완료: id={}", festaId);
 	}
 
 	@Operation(

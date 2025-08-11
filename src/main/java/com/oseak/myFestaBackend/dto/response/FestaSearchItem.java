@@ -15,14 +15,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "축제 상세 조회 결과")
-public class FestivalDetailResponseDto {
+@Schema(description = "축제 검색 결과 항목")
+public class FestaSearchItem {
 
 	@Schema(description = "축제 ID", example = "3481597")
-	private Long contentId;
+	private Long festaId;
 
 	@Schema(description = "축제명", example = "페인터즈")
 	private String festaName;
+
+	@Schema(description = "위도", example = "37.5681316804")
+	private Double latitude;
+
+	@Schema(description = "경도", example = "126.9696495605")
+	private Double longitude;
 
 	@Schema(description = "축제 주소", example = "서울특별시 중구 정동길 3 (정동)")
 	private String festaAddress;
@@ -57,10 +63,12 @@ public class FestivalDetailResponseDto {
 	@Schema(description = "축제 상태", example = "ONGOING")
 	private FestaStatus festaStatus;
 
-	public static FestivalDetailResponseDto from(Festa festa) {
-		return FestivalDetailResponseDto.builder()
-			.contentId(festa.getContentId())
+	public static FestaSearchItem from(Festa festa) {
+		return FestaSearchItem.builder()
+			.festaId(festa.getFestaId())
 			.festaName(festa.getFestaName())
+			.latitude(festa.getLatitude())
+			.longitude(festa.getLongitude())
 			.festaAddress(festa.getFestaAddress())
 			.festaStartAt(festa.getFestaStartAt())
 			.festaEndAt(festa.getFestaEndAt())

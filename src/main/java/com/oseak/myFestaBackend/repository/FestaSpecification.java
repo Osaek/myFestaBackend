@@ -5,12 +5,12 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
 import com.oseak.myFestaBackend.entity.Festa;
 
-public class FestivalSpecification {
+public class FestaSpecification {
 
-	public static Specification<Festa> createSpecification(FestivalSearchRequest request) {
+	public static Specification<Festa> createSpecification(FestaSearchRequest request) {
 		return Specification.allOf(
 			areaCodeEquals(request.getAreaCode()),
 			subAreaCodeEquals(request.getSubAreaCode()),

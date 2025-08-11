@@ -17,16 +17,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Schema(description = "축제 검색 응답")
-public class FestivalSearchResponse {
+public class FestaSearchResponse {
 	@Schema(description = "페이징 정보")
 	private PageInfo pageInfo;
 
 	@Schema(description = "축제 목록", example = "[]")
-	private List<FestivalSearchItem> festivals;
+	private List<FestaSearchItem> festas;
 
-	public static FestivalSearchResponse from(Page<FestivalSearchItem> page) {
-		return FestivalSearchResponse.builder()
-			.festivals(page.getContent())
+	public static FestaSearchResponse from(Page<FestaSearchItem> page) {
+		return FestaSearchResponse.builder()
+			.festas(page.getContent())
 			.pageInfo(PageInfo.of(page))
 			.build();
 	}

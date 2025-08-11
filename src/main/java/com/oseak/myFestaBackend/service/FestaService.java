@@ -5,7 +5,6 @@ import static com.oseak.myFestaBackend.common.exception.code.ServerErrorCode.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -32,15 +31,15 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
-import com.oseak.myFestaBackend.dto.response.FestivalDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
+import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
+import com.oseak.myFestaBackend.dto.response.FestaSearchItem;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.DevPickFestaRepository;
 import com.oseak.myFestaBackend.repository.FestaRepository;
-import com.oseak.myFestaBackend.repository.FestivalSpecification;
+import com.oseak.myFestaBackend.repository.FestaSpecification;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +62,7 @@ public class FestaService {
 	private String serviceKey;
 
 	@Transactional
-	public void fetchAndSaveFestivals(String eventStartDate, Integer areaCode) {
+	public void fetchAndSaveFestas(String eventStartDate, Integer areaCode) {
 		try {
 			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/searchFestival2")
 				.queryParam("MobileOS", "ETC")
@@ -99,25 +98,25 @@ public class FestaService {
 				String title = item.optString("title");
 				LocalDate startAt = parseDate(item.optString("eventstartdate"));
 				LocalDate endAt = parseDate(item.optString("eventenddate"));
-				Long contentId = item.optLong("contentid");
+				Long festaId = item.optLong("contentid");
 				Long contentTypeId = item.optLong("contenttypeid");
 
 				FestaStatus status = getStatusByDate(startAt, endAt);
-				Map<String, String> detailMap = fetchFestivalDetails(contentId, contentTypeId);
-				Map<String, String> introMap = fetchFestivalIntro(contentId, contentTypeId);
+				Map<String, String> detailMap = fetchFestaDetails(festaId, contentTypeId);
+				Map<String, String> introMap = fetchFestaIntro(festaId, contentTypeId);
 
-				Optional<Festa> optionalFesta = festaRepository.findByContentId(contentId);
+				Optional<Festa> optionalFesta = festaRepository.findById(festaId);
 				if (optionalFesta.isPresent()) {
-					log.info("기존 '{}' 행사 (contentId: {}) 업데이트 실행", title, contentId);
+					log.info("기존 '{}' 행사 (festaId: {}) 업데이트 실행", title, festaId);
 					Festa festa = optionalFesta.get();
 					festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
 					festa.updateIntro(introMap.get("playtime"), introMap.get("usetimefestival"));
 					festa.updateStatus(status);
 					festaRepository.save(festa);
 				} else {
-					log.info("신규 '{}' 행사 (contentId: {}) 저장 실행", title, contentId);
+					log.info("신규 '{}' 행사 (festaId: {}) 저장 실행", title, festaId);
 					Festa festa = Festa.builder()
-						.contentId(contentId)
+						.festaId(festaId)
 						.festaName(title)
 						.latitude(item.optDouble("mapy"))
 						.longitude(item.optDouble("mapx"))
@@ -143,7 +142,7 @@ public class FestaService {
 		}
 	}
 
-	private Map<String, String> fetchFestivalDetails(Long contentId, Long contentTypeId) {
+	private Map<String, String> fetchFestaDetails(Long contentId, Long contentTypeId) {
 		Map<String, String> result = new HashMap<>();
 		try {
 			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/detailInfo2")
@@ -191,7 +190,7 @@ public class FestaService {
 		return result;
 	}
 
-	private Map<String, String> fetchFestivalIntro(Long contentId, Long contentTypeId) {
+	private Map<String, String> fetchFestaIntro(Long contentId, Long contentTypeId) {
 		Map<String, String> result = new HashMap<>();
 		try {
 			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/detailIntro2")
@@ -289,14 +288,14 @@ public class FestaService {
 			.toList();
 	}
 
-	public List<FestaSummaryDto> getFestaSummariesByContentIds(List<Long> contentIds) {
-		List<Festa> festas = festaRepository.findAllByContentIdIn(contentIds);
+	public List<FestaSummaryDto> getFestaSummariesByFestaIds(List<Long> festaIds) {
+		List<Festa> festas = festaRepository.findAllByFestaIdIn(festaIds);
 
 		List<Long> foundIds = festas.stream()
-			.map(Festa::getContentId)
+			.map(Festa::getFestaId)
 			.toList();
 
-		List<Long> missingIds = contentIds.stream()
+		List<Long> missingIds = festaIds.stream()
 			.filter(id -> !foundIds.contains(id))
 			.toList();
 
@@ -309,20 +308,20 @@ public class FestaService {
 			.toList();
 	}
 
-	public List<FestaSimpleDto> getRandomFestivals(int count) {
-		List<Festa> randomFestivals = festaRepository.findRandomFestivals(count);
-		return randomFestivals.stream()
+	public List<FestaSimpleDto> getRandomFestas(int count) {
+		List<Festa> randomFestas = festaRepository.findRandomFestas(count);
+		return randomFestas.stream()
 			.map(FestaSimpleDto::from)
 			.toList();
 	}
 
-	public Page<FestivalSearchItem> search(FestivalSearchRequest request) {
-		Specification<Festa> spec = FestivalSpecification.createSpecification(request);
+	public Page<FestaSearchItem> search(FestaSearchRequest request) {
+		Specification<Festa> spec = FestaSpecification.createSpecification(request);
 		Pageable pageable = PageRequest.of(request.getValidPage(), request.getValidSize(),
 			Sort.by(Sort.Direction.ASC, "festaStartAt"));
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
-		return page.map(FestivalSearchItem::from);
+		return page.map(FestaSearchItem::from);
 	}
 
 	public List<DevPickFesta> getDeveloperPicks(int count) {
@@ -333,20 +332,20 @@ public class FestaService {
 	 * 축제 상세 정보 조회
 	 *
 	 * @param id 축제 ID
-	 * @return FestivalDetailResponseDto 축제 상세 정보
+	 * @return FestaDetailResponseDto 축제 상세 정보
 	 */
-	public FestivalDetailResponseDto getDetail(Long id) {
+	public FestaDetailResponseDto getDetail(Long id) {
 		log.debug("축제 상세 정보 조회 시작: id={}", id);
 
-		Festa festival = festaRepository.findById(id)
+		Festa festa = festaRepository.findById(id)
 			.orElseThrow(() -> {
 				log.debug("축제를 찾을 수 없습니다: id={}", id);
 				return new OsaekException(FESTA_NOT_FOUND);
 			});
 
-		FestivalDetailResponseDto responseDto = FestivalDetailResponseDto.from(festival);
+		FestaDetailResponseDto responseDto = FestaDetailResponseDto.from(festa);
 
-		log.debug("축제 상세 정보 조회 완료: id={}, name={}", id, festival.getFestaName());
+		log.debug("축제 상세 정보 조회 완료: id={}, name={}", id, festa.getFestaName());
 		return responseDto;
 	}
 

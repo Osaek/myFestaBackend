@@ -15,20 +15,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "축제 검색 결과 항목")
-public class FestivalSearchItem {
+@Schema(description = "축제 상세 조회 결과")
+public class FestaDetailResponseDto {
 
 	@Schema(description = "축제 ID", example = "3481597")
-	private Long contentId;
+	private Long festaId;
 
 	@Schema(description = "축제명", example = "페인터즈")
 	private String festaName;
-
-	@Schema(description = "위도", example = "37.5681316804")
-	private Double latitude;
-
-	@Schema(description = "경도", example = "126.9696495605")
-	private Double longitude;
 
 	@Schema(description = "축제 주소", example = "서울특별시 중구 정동길 3 (정동)")
 	private String festaAddress;
@@ -63,23 +57,21 @@ public class FestivalSearchItem {
 	@Schema(description = "축제 상태", example = "ONGOING")
 	private FestaStatus festaStatus;
 
-	public static FestivalSearchItem from(Festa festival) {
-		return FestivalSearchItem.builder()
-			.contentId(festival.getContentId())
-			.festaName(festival.getFestaName())
-			.latitude(festival.getLatitude())
-			.longitude(festival.getLongitude())
-			.festaAddress(festival.getFestaAddress())
-			.festaStartAt(festival.getFestaStartAt())
-			.festaEndAt(festival.getFestaEndAt())
-			.areaCode(festival.getAreaCode())
-			.subAreaCode(festival.getSubAreaCode())
-			.overview(festival.getOverview())
-			.description(festival.getDescription())
-			.imageUrl(festival.getImageUrl())
-			.openTime(festival.getOpenTime())
-			.feeInfo(festival.getFeeInfo())
-			.festaStatus(festival.getFestaStatus())
+	public static FestaDetailResponseDto from(Festa festa) {
+		return FestaDetailResponseDto.builder()
+			.festaId(festa.getFestaId())
+			.festaName(festa.getFestaName())
+			.festaAddress(festa.getFestaAddress())
+			.festaStartAt(festa.getFestaStartAt())
+			.festaEndAt(festa.getFestaEndAt())
+			.areaCode(festa.getAreaCode())
+			.subAreaCode(festa.getSubAreaCode())
+			.overview(festa.getOverview())
+			.description(festa.getDescription())
+			.imageUrl(festa.getImageUrl())
+			.openTime(festa.getOpenTime())
+			.feeInfo(festa.getFeeInfo())
+			.festaStatus(festa.getFestaStatus())
 			.build();
 	}
 }

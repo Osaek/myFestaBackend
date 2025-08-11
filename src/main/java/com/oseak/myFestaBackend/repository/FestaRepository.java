@@ -15,9 +15,7 @@ public interface FestaRepository extends JpaRepository<Festa, Long>, JpaSpecific
 
 	Optional<Festa> findByFestaNameAndFestaStartAt(String festaName, LocalDateTime festaStartAt);
 
-	Optional<Festa> findByContentId(Long contentId);
-
-	List<Festa> findAllByContentIdIn(List<Long> contentIds);
+	List<Festa> findAllByFestaIdIn(List<Long> festaIds);
 
 	//Haversine공식
 	@Query(value = """
@@ -34,6 +32,6 @@ public interface FestaRepository extends JpaRepository<Festa, Long>, JpaSpecific
 	List<Festa> findByDistance(double latitude, double longitude, double distance);
 
 	@Query(value = "SELECT * FROM festa ORDER BY RAND() LIMIT :limit", nativeQuery = true)
-	List<Festa> findRandomFestivals(int limit);
+	List<Festa> findRandomFestas(int limit);
 
 }
