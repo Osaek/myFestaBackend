@@ -32,7 +32,7 @@ env:
   DB_URL: ${{ secrets.DB_URL }}
   DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
   TOUR_API_URL: ${{ secrets.TOUR_API_URL}}
-  TOUR_API_SERVICE_KEY: ${{TOUR_API_SERVICE_KEY}}
+  TOUR_API_SERVICE_KEY: ${{ secrets.TOUR_API_SERVICE_KEY }}
 
 jobs:
   test:
@@ -87,7 +87,7 @@ jobs:
   build-and-publish:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/OSAEK-CI-CD-TEST' || github.event_name == 'release'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/OSAEK-CI-CD-TEST' || github.event_name == 'release'
     
     permissions:
       contents: read
@@ -577,6 +577,8 @@ jobs:
         - **App**: <$APP_URL>
         - **Docker**: \`$IMAGE\`
         - **Commit**: <$COMMIT_URL>"
+        elif [ "$STATUS" = "skipped" ]; then
+          MESSAGE="⏭️ **Deployment Skipped** (no matching conditions)."
         else
           MESSAGE="❌ **Deployment Failed!**
         - **Branch**: \`$BRANCH\`

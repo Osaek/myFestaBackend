@@ -35,8 +35,10 @@ import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
 import com.oseak.myFestaBackend.dto.response.FestivalDetailResponseDto;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
+import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
+import com.oseak.myFestaBackend.repository.DevPickFestaRepository;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 import com.oseak.myFestaBackend.repository.FestivalSpecification;
 
@@ -50,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FestaService {
 
 	private final FestaRepository festaRepository;
+	private final DevPickFestaRepository devPickFestaRepository;
 	private final WebClient webClient;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -67,7 +70,7 @@ public class FestaService {
 				.queryParam("MobileApp", UriUtils.encode("오색", StandardCharsets.UTF_8))
 				.queryParam("_type", "json")
 				.queryParam("eventStartDate", eventStartDate)
-				.queryParam("numOfRows", 200)
+				.queryParam("numOfRows", 1000)
 				.queryParam("serviceKey", serviceKey)
 				.queryParamIfPresent("areaCode", Optional.ofNullable(areaCode))
 				.build(true)
@@ -94,8 +97,8 @@ public class FestaService {
 			for (int i = 0; i < items.length(); i++) {
 				JSONObject item = items.getJSONObject(i);
 				String title = item.optString("title");
-				LocalDateTime startAt = parseDate(item.optString("eventstartdate"));
-				LocalDateTime endAt = parseDate(item.optString("eventenddate"));
+				LocalDate startAt = parseDate(item.optString("eventstartdate"));
+				LocalDate endAt = parseDate(item.optString("eventenddate"));
 				Long contentId = item.optLong("contentid");
 				Long contentTypeId = item.optLong("contenttypeid");
 
@@ -233,22 +236,22 @@ public class FestaService {
 		return (v == null || v.isBlank()) ? null : v;
 	}
 
-	private LocalDateTime parseDate(String dateStr) {
+	private LocalDate parseDate(String dateStr) {
 		try {
-			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE).atStartOfDay();
+			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	private FestaStatus getStatusByDate(LocalDateTime start, LocalDateTime end) {
+	private FestaStatus getStatusByDate(LocalDate start, LocalDate end) {
 		LocalDate today = LocalDate.now();
 		if (start == null || end == null) {
 			return FestaStatus.SCHEDULED;
 		}
-		if (today.isBefore(start.toLocalDate())) {
+		if (today.isBefore(start)) {
 			return FestaStatus.SCHEDULED;
-		} else if (!today.isAfter(end.toLocalDate())) {
+		} else if (!today.isAfter(end)) {
 			return FestaStatus.ONGOING;
 		} else {
 			return FestaStatus.COMPLETED;
@@ -257,23 +260,12 @@ public class FestaService {
 
 	@Transactional
 	public void updateAllFestaStatus() {
-		LocalDate today = LocalDate.now();
 
 		festaRepository.findAll().forEach(festa -> {
-			LocalDate start = festa.getFestaStartAt() != null ? festa.getFestaStartAt().toLocalDate() : null;
-			LocalDate end = festa.getFestaEndAt() != null ? festa.getFestaEndAt().toLocalDate() : null;
+			LocalDate start = festa.getFestaStartAt();
+			LocalDate end = festa.getFestaEndAt();
 
-			FestaStatus newStatus;
-
-			if (start == null || end == null) {
-				newStatus = FestaStatus.SCHEDULED; // 기본값 또는 예외 처리 가능
-			} else if (today.isBefore(start)) {
-				newStatus = FestaStatus.SCHEDULED;
-			} else if (!today.isAfter(end)) {
-				newStatus = FestaStatus.ONGOING;
-			} else {
-				newStatus = FestaStatus.COMPLETED;
-			}
+			FestaStatus newStatus = getStatusByDate(start, end);
 
 			if (festa.getFestaStatus() != newStatus) {
 				festa.updateStatus(newStatus);
@@ -331,6 +323,10 @@ public class FestaService {
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
 		return page.map(FestivalSearchItem::from);
+	}
+
+	public List<DevPickFesta> getDeveloperPicks(int count) {
+		return devPickFestaRepository.pickRandom(count);
 	}
 
 	/**

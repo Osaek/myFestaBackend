@@ -22,6 +22,7 @@ import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
 import com.oseak.myFestaBackend.dto.response.FestivalDetailResponseDto;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchItem;
 import com.oseak.myFestaBackend.dto.response.FestivalSearchResponse;
+import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.service.FestaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,8 +79,9 @@ public class FestaController {
 		}
 	)
 	@GetMapping("/summary")
-	public ResponseEntity<CommonResponse<List<FestaSummaryDto>>> getFestivalSummaries(@RequestParam List<Long> ids) {
-		return ResponseEntity.ok(CommonResponse.success(festaService.getFestaSummariesByContentIds(ids)));
+	public ResponseEntity<CommonResponse<List<FestaSummaryDto>>> getFestivalSummaries(
+		@RequestParam List<Long> contentIds) {
+		return ResponseEntity.ok(CommonResponse.success(festaService.getFestaSummariesByContentIds(contentIds)));
 	}
 
 	@Operation(
@@ -158,6 +160,25 @@ public class FestaController {
 		}
 
 		log.debug("축제 ID 유효성 검증 완료: id={}", id);
+	}
+	@Operation(
+		summary = "개발자 추천 축제",
+		description = "메인에 노출할 추천 축제를 반환합니다.",
+		parameters = {
+			@Parameter(name = "count", description = "가져올 개수 (기본 2)", required = false, example = "2")
+		},
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "추천 축제 리스트 반환",
+				content = @Content(mediaType = "application/json", schema = @Schema(implementation = DevPickFesta.class))
+			)
+		}
+	)
+	@GetMapping("/picks")
+	public ResponseEntity<CommonResponse<List<DevPickFesta>>> getDeveloperPicks(
+		@RequestParam(defaultValue = "2") int count) {
+		return ResponseEntity.ok(CommonResponse.success(festaService.getDeveloperPicks(count)));
 	}
 
 }
