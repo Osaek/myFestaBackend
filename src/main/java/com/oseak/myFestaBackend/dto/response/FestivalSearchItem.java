@@ -1,6 +1,6 @@
 package com.oseak.myFestaBackend.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
@@ -18,10 +18,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "축제 검색 결과 항목")
 public class FestivalSearchItem {
 
-	@Schema(description = "축제 ID", example = "30")
-	private Long festaId;
-
-	@Schema(description = "컨텐츠 ID", example = "3481597")
+	@Schema(description = "축제 ID", example = "3481597")
 	private Long contentId;
 
 	@Schema(description = "축제명", example = "페인터즈")
@@ -36,11 +33,11 @@ public class FestivalSearchItem {
 	@Schema(description = "축제 주소", example = "서울특별시 중구 정동길 3 (정동)")
 	private String festaAddress;
 
-	@Schema(description = "축제 시작 일시", example = "2022-11-01T00:00:00")
-	private LocalDateTime festaStartAt;
+	@Schema(description = "축제 시작일", example = "2022-11-01")
+	private LocalDate festaStartAt;
 
-	@Schema(description = "축제 종료 일시", example = "2025-12-31T00:00:00")
-	private LocalDateTime festaEndAt;
+	@Schema(description = "축제 종료일", example = "2025-12-31")
+	private LocalDate festaEndAt;
 
 	@Schema(description = "지역 코드", example = "1")
 	private Integer areaCode;
@@ -68,7 +65,6 @@ public class FestivalSearchItem {
 
 	public static FestivalSearchItem from(Festa festival) {
 		return FestivalSearchItem.builder()
-			.festaId(festival.getFestaId())
 			.contentId(festival.getContentId())
 			.festaName(festival.getFestaName())
 			.latitude(festival.getLatitude())

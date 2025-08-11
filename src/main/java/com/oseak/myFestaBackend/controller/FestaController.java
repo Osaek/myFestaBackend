@@ -118,7 +118,7 @@ public class FestaController {
 		return ResponseEntity.ok(CommonResponse.success(festivalSearchResponse));
 	}
 
-	@GetMapping("/{id}/detail")
+	@GetMapping("/{contentId}/detail")
 	@Operation(summary = "축제 상세 조회", description = "단건의 축제 상세 정보를 조회합니다.")
 	@ApiResponse(
 		responseCode = "200",
@@ -131,11 +131,11 @@ public class FestaController {
 			required = true,
 			example = "1"
 		)
-		@PathVariable Long id) {
-		log.debug("상세 조회 요청: id={}", id);
-		validateFestivalId(id);
+		@PathVariable Long contentId) {
+		log.debug("상세 조회 요청: id={}", contentId);
+		validateFestivalId(contentId);
 
-		FestivalDetailResponseDto festivalDetail = festaService.getDetail(id);
+		FestivalDetailResponseDto festivalDetail = festaService.getDetail(contentId);
 
 		return ResponseEntity.ok(CommonResponse.success(festivalDetail));
 	}
@@ -143,24 +143,24 @@ public class FestaController {
 	/**
 	 * 축제 ID 유효성 검증
 	 *
-	 * @param id 검증할 축제 ID
-	 * @throws IllegalArgumentException ID가 null이거나 0 이하인 경우
+	 * @param contentId 검증할 축제 ID
 	 */
-	private void validateFestivalId(Long id) {
-		log.debug("축제 ID 유효성 검증 시작: id={}", id);
+	private void validateFestivalId(Long contentId) {
+		log.debug("축제 ID 유효성 검증 시작: id={}", contentId);
 
-		if (id == null) {
+		if (contentId == null) {
 			log.debug("축제 ID가 null입니다");
 			throw new OsaekException(ClientErrorCode.FESTIVAL_ID_NULL);
 		}
 
-		if (id <= 0) {
-			log.debug("유효하지 않은 축제 ID입니다: id={}", id);
+		if (contentId <= 0) {
+			log.debug("유효하지 않은 축제 ID입니다: id={}", contentId);
 			throw new OsaekException(ClientErrorCode.FESTIVAL_ID_INVALID);
 		}
 
-		log.debug("축제 ID 유효성 검증 완료: id={}", id);
+		log.debug("축제 ID 유효성 검증 완료: id={}", contentId);
 	}
+
 	@Operation(
 		summary = "개발자 추천 축제",
 		description = "메인에 노출할 추천 축제를 반환합니다.",
