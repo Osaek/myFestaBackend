@@ -1,6 +1,6 @@
 package com.oseak.myFestaBackend.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
@@ -16,13 +16,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Schema(description = "축제 검색 결과 항목")
-public class FestivalSearchItem {
+public class FestaSearchItem {
 
-	@Schema(description = "축제 ID", example = "30")
+	@Schema(description = "축제 ID", example = "3481597")
 	private Long festaId;
-
-	@Schema(description = "컨텐츠 ID", example = "3481597")
-	private Long contentId;
 
 	@Schema(description = "축제명", example = "페인터즈")
 	private String festaName;
@@ -36,11 +33,11 @@ public class FestivalSearchItem {
 	@Schema(description = "축제 주소", example = "서울특별시 중구 정동길 3 (정동)")
 	private String festaAddress;
 
-	@Schema(description = "축제 시작 일시", example = "2022-11-01T00:00:00")
-	private LocalDateTime festaStartAt;
+	@Schema(description = "축제 시작일", example = "2022-11-01")
+	private LocalDate festaStartAt;
 
-	@Schema(description = "축제 종료 일시", example = "2025-12-31T00:00:00")
-	private LocalDateTime festaEndAt;
+	@Schema(description = "축제 종료일", example = "2025-12-31")
+	private LocalDate festaEndAt;
 
 	@Schema(description = "지역 코드", example = "1")
 	private Integer areaCode;
@@ -66,24 +63,23 @@ public class FestivalSearchItem {
 	@Schema(description = "축제 상태", example = "ONGOING")
 	private FestaStatus festaStatus;
 
-	public static FestivalSearchItem from(Festa festival) {
-		return FestivalSearchItem.builder()
-			.festaId(festival.getFestaId())
-			.contentId(festival.getContentId())
-			.festaName(festival.getFestaName())
-			.latitude(festival.getLatitude())
-			.longitude(festival.getLongitude())
-			.festaAddress(festival.getFestaAddress())
-			.festaStartAt(festival.getFestaStartAt())
-			.festaEndAt(festival.getFestaEndAt())
-			.areaCode(festival.getAreaCode())
-			.subAreaCode(festival.getSubAreaCode())
-			.overview(festival.getOverview())
-			.description(festival.getDescription())
-			.imageUrl(festival.getImageUrl())
-			.openTime(festival.getOpenTime())
-			.feeInfo(festival.getFeeInfo())
-			.festaStatus(festival.getFestaStatus())
+	public static FestaSearchItem from(Festa festa) {
+		return FestaSearchItem.builder()
+			.festaId(festa.getFestaId())
+			.festaName(festa.getFestaName())
+			.latitude(festa.getLatitude())
+			.longitude(festa.getLongitude())
+			.festaAddress(festa.getFestaAddress())
+			.festaStartAt(festa.getFestaStartAt())
+			.festaEndAt(festa.getFestaEndAt())
+			.areaCode(festa.getAreaCode())
+			.subAreaCode(festa.getSubAreaCode())
+			.overview(festa.getOverview())
+			.description(festa.getDescription())
+			.imageUrl(festa.getImageUrl())
+			.openTime(festa.getOpenTime())
+			.feeInfo(festa.getFeeInfo())
+			.festaStatus(festa.getFestaStatus())
 			.build();
 	}
 }

@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class FestaSummaryDto {
-	private Long contentId;
+	private Long festaId;
 	private String festaName;
 	private String imageUrl;
 	private String festaAddress;
@@ -20,7 +20,7 @@ public class FestaSummaryDto {
 
 	public static FestaSummaryDto from(Festa festa) {
 		return FestaSummaryDto.builder()
-			.contentId(festa.getContentId())
+			.festaId(festa.getFestaId())
 			.festaName(festa.getFestaName())
 			.imageUrl(festa.getImageUrl())
 			.festaAddress(festa.getFestaAddress())

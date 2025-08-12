@@ -1,18 +1,16 @@
 package com.oseak.myFestaBackend.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import com.oseak.myFestaBackend.dto.request.FestivalSearchRequest;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
 import com.oseak.myFestaBackend.entity.Festa;
 
-public class FestivalSpecification {
+public class FestaSpecification {
 
-	public static Specification<Festa> createSpecification(FestivalSearchRequest request) {
+	public static Specification<Festa> createSpecification(FestaSearchRequest request) {
 		return Specification.allOf(
 			areaCodeEquals(request.getAreaCode()),
 			subAreaCodeEquals(request.getSubAreaCode()),
@@ -73,18 +71,14 @@ public class FestivalSpecification {
 				return cb.conjunction();
 
 			if (startDate != null && endDate != null) {
-				LocalDateTime start = startDate.atStartOfDay();
-				LocalDateTime end = endDate.atTime(LocalTime.MAX);
 				return cb.and(
-					cb.lessThanOrEqualTo(root.get("festaStartAt"), end),
-					cb.greaterThanOrEqualTo(root.get("festaEndAt"), start)
+					cb.lessThanOrEqualTo(root.get("festaStartAt"), endDate),
+					cb.greaterThanOrEqualTo(root.get("festaEndAt"), startDate)
 				);
 			} else if (startDate != null) {
-				LocalDateTime start = startDate.atStartOfDay();
-				return cb.greaterThanOrEqualTo(root.get("festaEndAt"), start);
+				return cb.greaterThanOrEqualTo(root.get("festaEndAt"), startDate);
 			} else { // endDate != null
-				LocalDateTime end = endDate.atTime(LocalTime.MAX);
-				return cb.lessThanOrEqualTo(root.get("festaStartAt"), end);
+				return cb.lessThanOrEqualTo(root.get("festaStartAt"), endDate);
 			}
 		};
 	}
