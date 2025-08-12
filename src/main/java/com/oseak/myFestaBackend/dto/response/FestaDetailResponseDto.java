@@ -3,7 +3,6 @@ package com.oseak.myFestaBackend.dto.response;
 import java.time.LocalDate;
 
 import com.oseak.myFestaBackend.entity.Festa;
-import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -33,12 +32,6 @@ public class FestaDetailResponseDto {
 	@Schema(description = "축제 종료일", example = "2025-12-31")
 	private LocalDate festaEndAt;
 
-	@Schema(description = "지역 코드", example = "1")
-	private Integer areaCode;
-
-	@Schema(description = "세부 지역 코드", example = "24")
-	private Integer subAreaCode;
-
 	@Schema(description = "개요", example = "2008년 초연된 페인터즈는 화려한 안무와 라이브 드로잉...")
 	private String overview;
 
@@ -54,9 +47,6 @@ public class FestaDetailResponseDto {
 	@Schema(description = "요금 정보", example = "성인 15,000원, 청소년 12,000원")
 	private String feeInfo;
 
-	@Schema(description = "축제 상태", example = "ONGOING")
-	private FestaStatus festaStatus;
-
 	public static FestaDetailResponseDto from(Festa festa) {
 		return FestaDetailResponseDto.builder()
 			.festaId(festa.getFestaId())
@@ -64,14 +54,11 @@ public class FestaDetailResponseDto {
 			.festaAddress(festa.getFestaAddress())
 			.festaStartAt(festa.getFestaStartAt())
 			.festaEndAt(festa.getFestaEndAt())
-			.areaCode(festa.getAreaCode())
-			.subAreaCode(festa.getSubAreaCode())
 			.overview(festa.getOverview())
 			.description(festa.getDescription())
 			.imageUrl(festa.getImageUrl())
 			.openTime(festa.getOpenTime())
 			.feeInfo(festa.getFeeInfo())
-			.festaStatus(festa.getFestaStatus())
 			.build();
 	}
 }
