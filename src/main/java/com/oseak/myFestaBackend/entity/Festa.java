@@ -1,5 +1,6 @@
 package com.oseak.myFestaBackend.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,8 +12,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -27,12 +26,8 @@ import lombok.NoArgsConstructor;
 public class Festa {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "festa_id")
 	private Long festaId;
-
-	@Column(unique = true)
-	private Long contentId;
 
 	@Column(name = "festa_name", nullable = false)
 	private String festaName;
@@ -45,10 +40,10 @@ public class Festa {
 	private String festaAddress;
 
 	@Column(name = "festa_start_at")
-	private LocalDateTime festaStartAt;
+	private LocalDate festaStartAt;
 
 	@Column(name = "festa_end_at")
-	private LocalDateTime festaEndAt;
+	private LocalDate festaEndAt;
 
 	@Column(name = "area_code")
 	private Integer areaCode;
@@ -84,11 +79,11 @@ public class Festa {
 	private LocalDateTime updatedAt;
 
 	@Builder
-	public Festa(Long contentId, String festaName, Double latitude, Double longitude, String festaAddress,
-		LocalDateTime festaStartAt, LocalDateTime festaEndAt, Integer areaCode, Integer subAreaCode,
+	public Festa(Long festaId, String festaName, Double latitude, Double longitude, String festaAddress,
+		LocalDate festaStartAt, LocalDate festaEndAt, Integer areaCode, Integer subAreaCode,
 		String overview, String description, String imageUrl, String openTime, String feeInfo,
 		FestaStatus festaStatus) {
-		this.contentId = contentId;
+		this.festaId = festaId;
 		this.festaName = festaName;
 		this.latitude = latitude;
 		this.longitude = longitude;
@@ -109,7 +104,7 @@ public class Festa {
 		this.overview = overview;
 		this.description = description;
 	}
-	
+
 	public void updateIntro(String playtime, String feeInfo) {
 		if (playtime != null && !playtime.isBlank()) {
 			this.openTime = playtime;
