@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
  *   <li><b>도메인코드 (2자리)</b>: 10 = 회원/인증 도메인</li>
  *   <li><b>에러번호 (3자리)</b>: 도메인 내 개별 에러 식별 번호</li>
  * </ul>
- *
  * 예: <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
  */
 @Getter
@@ -22,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 public enum ClientErrorCode implements BaseErrorCode {
 	// 검증메시지 관련
 	INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "OSAEK-20001", "validation.invalid_input_value"),
+	// ShortCode관련
+	SHORT_CODE_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-20002", "short.code.invalid"),
 	// 회원 조회 관련
 	USER_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10001", "user.id.not_found"),
 	USER_EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10002", "user.email.not_found"),
