@@ -55,7 +55,11 @@ public enum ClientErrorCode implements BaseErrorCode {
 	OAUTH_PASSWORD_CANT_CHANGE(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10217", "password.cant_change"),
 
 	// 지역 코드 관련
-	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found");
+	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found"),
+
+	// S3 코드 관련
+	S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10510", "s3.upload.fail"),
+	S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10511", "s3.delete.fail");
 
 	private final HttpStatus httpStatus;
 	private final String code;
