@@ -34,9 +34,15 @@ public class Story {
 	@Column(name = "is_open", nullable = false)
 	private Boolean isOpen;
 
+	@Column(name = "thumbnail_url", length = 500, nullable = false)
+	private String thumbnailUrl;
+
 	@Column(name = "story_s3_url", length = 500, nullable = false)
 	private String storyS3Url;
 
+	@Column(name = "story_type", length = 10, nullable = false)
+	private String storyType;
+	
 	@Column(name = "festa_id")
 	private Long festaId;
 
