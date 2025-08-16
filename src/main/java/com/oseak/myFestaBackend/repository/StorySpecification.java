@@ -15,7 +15,7 @@ public class StorySpecification {
 			memberIdEquals(request.getMemberId()),
 			festaIdEquals(request.getFestaId()),
 			keywordContains(request.getKeyword()),
-			visibilityRule(request.getMemberId(), viewerMemberId)
+			visibilityRule(request, viewerMemberId)
 		);
 	}
 
@@ -53,13 +53,16 @@ public class StorySpecification {
 	}
 
 	/**
-	 * 가시성 규칙:
-	 * - targetMemberId == viewerMemberId (내 스토리 조회) 이면 isOpen 필터 미적용
-	 * - 그 외(남의/전체/축제상세) 공개글만
+	 * 공개/비공개 규칙
+	 * - 기본: 공개글만
+	 * - 내 프로필 화면(= targetMemberId == viewer) && includePrivateMine=true: 비공개 포함
 	 */
-	private static Specification<Story> visibilityRule(Long targetMemberId, Long viewerMemberId) {
-		boolean isMine = (targetMemberId != null) && Objects.equals(targetMemberId, viewerMemberId);
-		return isMine ? null : (root, q, cb) -> cb.isTrue(root.get("isOpen"));
+	private static Specification<Story> visibilityRule(StorySearchRequestDto req, Long viewerMemberId) {
+		boolean mine = (req.getMemberId() != null) && Objects.equals(req.getMemberId(), viewerMemberId);
+		boolean allowPrivateMine = mine && req.isIncludePrivateMine();
+
+		// allowPrivateMine일 때만 공개 필터 미적용(= 전체), 그 외에는 공개만
+		return allowPrivateMine ? null : (root, q, cb) -> cb.isTrue(root.get("isOpen"));
 	}
 
 	/**

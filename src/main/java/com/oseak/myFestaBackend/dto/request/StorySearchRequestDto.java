@@ -27,5 +27,13 @@ public class StorySearchRequestDto extends PageRequest {
 	@Hidden
 	@Schema(description = "축제ID")
 	private Long festaId;
+	
+	@Schema(description = "내 비공개 스토리를 포함할지 여부(내 프로필 화면에서만 사용)")
+	private Boolean includePrivateMine;
+
+	@Schema(hidden = true)
+	public boolean isIncludePrivateMine() {
+		return Boolean.TRUE.equals(includePrivateMine);
+	}
 }
 

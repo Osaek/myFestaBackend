@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Objects;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -33,12 +36,12 @@ public class StoryService {
 	public Page<StoryItem> search(StorySearchRequestDto request, Long viewerMemberId) {
 		Specification<Story> spec = StorySpecification.createSpecification(request, viewerMemberId);
 
-		org.springframework.data.domain.Pageable pageable =
-			org.springframework.data.domain.PageRequest.of(
+		Pageable pageable =
+			PageRequest.of(
 				request.getValidPage(),
 				request.getValidSize(),
-				org.springframework.data.domain.Sort.by("createdAt").descending()
-					.and(org.springframework.data.domain.Sort.by("storyId").descending())
+				Sort.by("createdAt").descending()
+					.and(Sort.by("storyId").descending())
 			);
 
 		Page<Story> page = storyRepository.findAll(spec, pageable);
