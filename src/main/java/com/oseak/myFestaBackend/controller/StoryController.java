@@ -1,7 +1,5 @@
 package com.oseak.myFestaBackend.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +22,7 @@ import com.oseak.myFestaBackend.dto.request.StoryUploadRequestDto;
 import com.oseak.myFestaBackend.dto.request.StoryVisibilityUpdateRequestDto;
 import com.oseak.myFestaBackend.dto.response.StoryItem;
 import com.oseak.myFestaBackend.dto.response.StorySearchResponseDto;
+import com.oseak.myFestaBackend.service.S3Service;
 import com.oseak.myFestaBackend.service.StoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,10 +44,16 @@ import lombok.extern.slf4j.Slf4j;
 public class StoryController {
 
 	private final StoryService storyService;
+	private final S3Service s3Service;
 
 	@PostMapping("/upload")
-	public ResponseEntity<CommonResponse<Void>> uploadStory(@RequestParam("files") List<MultipartFile> file) {
+	public ResponseEntity<CommonResponse<Void>> uploadStory(@RequestParam("file") MultipartFile file) {
+		log.debug("Story upload request received - file size: {}, content type: {}",
+			file.getSize(), file.getContentType());
 
+		Long memberId = SecurityUtil.getCurrentUserId();
+
+		storyService.uploadStory(file, memberId);
 		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success(null));
 	}
 
