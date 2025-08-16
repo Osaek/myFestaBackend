@@ -23,6 +23,8 @@ public enum ClientErrorCode implements BaseErrorCode {
 	INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "OSAEK-20001", "validation.invalid_input_value"),
 	// ShortCode관련
 	SHORT_CODE_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-20002", "short.code.invalid"),
+	// 권한 없음
+	FORBIDDEN(HttpStatus.FORBIDDEN, "OSAEK-20003", "validation.forbidden"),
 	// 회원 조회 관련
 	USER_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10001", "user.id.not_found"),
 	USER_EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10002", "user.email.not_found"),
@@ -60,7 +62,11 @@ public enum ClientErrorCode implements BaseErrorCode {
 
 	// S3 코드 관련
 	S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10510", "s3.upload.fail"),
-	S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10511", "s3.delete.fail");
+	S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10511", "s3.delete.fail"),
+
+	// 스토리 관련
+	STORY_CODE_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-30001", "story.code.invalid"),
+	STORY_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-30002", "story.not_found");
 
 	private final HttpStatus httpStatus;
 	private final String code;
