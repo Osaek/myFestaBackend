@@ -28,6 +28,7 @@ import com.oseak.myFestaBackend.service.StoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -61,18 +62,54 @@ public class StoryController {
 	}
 
 	@GetMapping
-	@Operation(summary = "스토리 목록 조회", description = "여러 조건(축제명, 사용자)으로 스토리 목록을 조회합니다. 자신이 비공개처리한 스토리는 해당 회원이 검새해도 보이지 않도록 처리하여 비공개처리여부를 확인할 수 있습니다.")
-	@ApiResponse(
-		responseCode = "200",
-		description = "검색 성공",
-		content = @Content(schema = @Schema(implementation = CommonResponse.class))
+	@Operation(
+		summary = "스토리 목록 조회",
+		description = """
+			여러 조건(축제, 사용자, 키워드)으로 스토리를 페이지네이션하여 조회합니다.
+			
+			• 기본(검색/타인 프로필): 공개 스토리만 노출
+			• 내 프로필: includePrivateMine=true일 때만 내 비공개 포함
+			• 삭제된 스토리(isDeleted=true)는 항상 제외
+			정렬: createdAt DESC, storyId DESC
+			
+			요청 예시
+			- 내 프로필(특정 축제, 비공개 포함)
+			  GET /stories?memberId=123&includePrivateMine=true&festaId=987&page=0&size=20
+			
+			- 남의 프로필(특정 축제)
+			  GET /stories?memberId=456&festaId=987&page=0&size=20
+			
+			- 검색 페이지(특정 축제 + 키워드)
+			  GET /stories?festaId=987&keyword=불꽃놀이&page=0&size=20
+			""",
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "검색 성공",
+				content = @Content(
+					mediaType = MediaType.APPLICATION_JSON_VALUE,
+					schema = @Schema(implementation = CommonResponse.class)
+				)
+			)
+		}
 	)
+	@Parameters({
+		@Parameter(name = "memberId", description = "조회 대상 회원 ID (내/타인 프로필 조회에 사용)", example = "123"),
+		@Parameter(name = "includePrivateMine", description = "내 프로필에서 내 비공개 포함 여부(내 계정일 때만 유효)", example = "true"),
+		@Parameter(name = "festaId", description = "특정 축제 ID 필터", example = "1390147"),
+		@Parameter(name = "keyword", description = "축제명 키워드(대소문자 무시, LIKE 검색)", example = "불꽃놀이"),
+		@Parameter(name = "page", description = "0부터 시작하는 페이지 번호", example = "0"),
+		@Parameter(name = "size", description = "페이지 크기", example = "20")
+	})
 	public ResponseEntity<CommonResponse<StorySearchResponseDto>> searchStories(
-		@ModelAttribute StorySearchRequestDto request) {
-		log.debug("받은 요청: keyword={} memberId={}", request.getKeyword(), request.getMemberId());
+		@ModelAttribute StorySearchRequestDto request
+	) {
+		log.debug("받은 요청: keyword={} memberId={} festaId={} includePrivateMine={}",
+			request.getKeyword(), request.getMemberId(), request.getFestaId(), request.getIncludePrivateMine());
 
 		Long viewerMemberId = SecurityUtil.getCurrentUserId();
 		log.debug("요청회원: {}", viewerMemberId);
+
 		Page<StoryItem> stories = storyService.search(request, viewerMemberId);
 		return ResponseEntity.ok(CommonResponse.success(StorySearchResponseDto.from(stories)));
 	}

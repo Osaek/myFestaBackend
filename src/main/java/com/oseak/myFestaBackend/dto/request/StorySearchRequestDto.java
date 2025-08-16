@@ -2,7 +2,6 @@ package com.oseak.myFestaBackend.dto.request;
 
 import com.oseak.myFestaBackend.common.request.PageRequest;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,10 +23,9 @@ public class StorySearchRequestDto extends PageRequest {
 	@Schema(description = "검색 축제 키워드", example = "벚꽃축제")
 	private String keyword;
 
-	@Hidden
 	@Schema(description = "축제ID")
 	private Long festaId;
-	
+
 	@Schema(description = "내 비공개 스토리를 포함할지 여부(내 프로필 화면에서만 사용)")
 	private Boolean includePrivateMine;
 
