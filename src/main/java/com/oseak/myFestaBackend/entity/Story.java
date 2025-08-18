@@ -67,6 +67,13 @@ public class Story {
 		this.isDeleted = false;
 	}
 
+	public void completeMediaProcessing(String originalS3Url, String
+		thumbnailS3Url, String status) {
+		this.storyS3Url = originalS3Url;
+		this.thumbnailUrl = thumbnailS3Url;
+		this.processingStatus = status;
+	}
+
 	/**
 	 * 논리 삭제: 공개를 끄고 삭제 플래그 ON
 	 */
