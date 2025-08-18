@@ -1,6 +1,6 @@
 package com.oseak.myFestaBackend.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.oseak.myFestaBackend.entity.Festa;
 
@@ -10,17 +10,17 @@ import lombok.Getter;
 @Getter
 @Builder
 public class FestaSummaryDto {
-	private Long contentId;
+	private Long festaId;
 	private String festaName;
 	private String imageUrl;
 	private String festaAddress;
-	private LocalDateTime festaStartAt;
-	private LocalDateTime festaEndAt;
+	private LocalDate festaStartAt;
+	private LocalDate festaEndAt;
 	private String overview;
 
 	public static FestaSummaryDto from(Festa festa) {
 		return FestaSummaryDto.builder()
-			.contentId(festa.getContentId())
+			.festaId(festa.getFestaId())
 			.festaName(festa.getFestaName())
 			.imageUrl(festa.getImageUrl())
 			.festaAddress(festa.getFestaAddress())

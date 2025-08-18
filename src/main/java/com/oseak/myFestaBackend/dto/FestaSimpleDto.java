@@ -8,13 +8,13 @@ import lombok.Getter;
 @Getter
 @Builder
 public class FestaSimpleDto {
-	private Long contentId;
+	private Long festaId;
 	private String festaName;
 	private String imageUrl;
 
 	public static FestaSimpleDto from(Festa festa) {
 		return FestaSimpleDto.builder()
-			.contentId(festa.getContentId())
+			.festaId(festa.getFestaId())
 			.festaName(festa.getFestaName())
 			.imageUrl(festa.getImageUrl())
 			.build();

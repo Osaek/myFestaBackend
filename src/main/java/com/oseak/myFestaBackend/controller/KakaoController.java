@@ -50,8 +50,14 @@ public class KakaoController {
 			description = "로그인 성공 후 리다이렉트",
 			headers = {
 				@Header(name = "Set-Cookie",
-					description = "accessToken=JWT토큰; Path=/; Max-Age=360; HttpOnly\n" +
-						"refreshToken=JWT토큰; Path=/; Max-Age=3600; HttpOnly",
+					description = """
+						다음 쿠키들이 설정됩니다:
+						- accessToken: JWT 액세스 토큰 (만료: 6분)
+						- refreshToken: JWT 리프레시 토큰 (만료: 1시간)
+						- nickname: 사용자 닉네임 (만료: 1시간)
+						- profile: 프로필 이미지 URL (만료: 1시간)
+						모든 쿠키는 HttpOnly 속성이 적용됩니다.
+						""",
 					schema = @Schema(type = "string"))
 			}
 		)
@@ -70,6 +76,16 @@ public class KakaoController {
 		refreshTokenCookie.setPath("/");
 		refreshTokenCookie.setMaxAge(3600);
 		refreshTokenCookie.setHttpOnly(true);
+
+		Cookie nickname = new Cookie("nickname", result.getNickname());
+		nickname.setPath("/");
+		nickname.setMaxAge(3600);
+		nickname.setHttpOnly(true);
+
+		Cookie profile = new Cookie("profile", result.getProfile());
+		profile.setPath("/");
+		profile.setMaxAge(3600);
+		profile.setHttpOnly(true);
 
 		response.addCookie(accessTokenCookie);
 		response.addCookie(refreshTokenCookie);

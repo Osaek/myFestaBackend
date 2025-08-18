@@ -14,7 +14,9 @@ import lombok.RequiredArgsConstructor;
  *   <li><b>도메인코드 (2자리)</b>: 10 = 회원/인증 도메인</li>
  *   <li><b>에러번호 (3자리)</b>: 도메인 내 개별 에러 식별 번호</li>
  * </ul>
- * 예: <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
+ * <p>
+ * <code>OSAEK-10001</code> → 회원 도메인(10)에서 정의한 첫 번째 에러
+ * <code>OSAEK-30001</code> → 축제 도메인(30)에서 정의한 첫 번째 에러
  */
 @Getter
 @RequiredArgsConstructor
@@ -59,7 +61,7 @@ public enum ClientErrorCode implements BaseErrorCode {
 
 	// 지역 코드 관련
 	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found"),
-
+  
 	// S3 코드 관련
 	S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10510", "s3.upload.fail"),
 	S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10511", "s3.delete.fail"),
@@ -76,7 +78,10 @@ public enum ClientErrorCode implements BaseErrorCode {
 	FILE_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "OSAEK-10515", "file.size_exceed"),
 	MEDIA_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10516", "media.upload.fail"),
 	THUMBNAIL_GENERATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10517", "thumbnail.generation.fail"),
-	;
+
+	// 축제 관련
+	FESTA_ID_NULL(HttpStatus.BAD_REQUEST, "OSAEK-30002", "festa.id.null"),
+	FESTA_ID_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-30003", "festa.id.invalid");
 
 	private final HttpStatus httpStatus;
 	private final String code;
