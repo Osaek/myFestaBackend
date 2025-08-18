@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.common.util.SecurityUtil;
@@ -46,24 +44,31 @@ public class StoryController {
 	private final StoryService storyService;
 	private final S3Service s3Service;
 
+	// @PostMapping("/upload")
+	// public ResponseEntity<CommonResponse<Void>> uploadStory(@RequestParam("file") MultipartFile file) {
+	// 	log.debug("Story upload request received - file size: {}, content type: {}",
+	// 		file.getSize(), file.getContentType());
+	//
+	// 	Long memberId = SecurityUtil.getCurrentUserId();
+	//
+	// 	storyService.uploadStory(file, memberId);
+	// 	return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success(null));
+	// }
+
 	@PostMapping("/upload")
-	public ResponseEntity<CommonResponse<Void>> uploadStory(@RequestParam("file") MultipartFile file) {
-		log.debug("Story upload request received - file size: {}, content type: {}",
-			file.getSize(), file.getContentType());
-
-		Long memberId = SecurityUtil.getCurrentUserId();
-
-		storyService.uploadStory(file, memberId);
-		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.success(null));
-	}
-
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(summary = "스토리 업로드", description = "이미지/비디오 파일과 함께 축제 정보를 업로드합니다.")
-	public ResponseEntity<CommonResponse<String>> uploadStory(@ModelAttribute StoryUploadRequestDto request) {
+	public ResponseEntity<CommonResponse<StoryItem>> uploadStory(@ModelAttribute StoryUploadRequestDto request) {
 		// TODO: 비즈니스 로직 완성 후 연결
-		// String storyCode = storyService.uploadStory(request);
-		String storyCode = "1234567890";
-		return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storyCode));
+		log.info("=== 받은 데이터 확인 ===");
+		log.info("File: {}", request.getFile() != null ? request.getFile().getOriginalFilename() : "null");
+		log.info("MemberId: {}", request.getMemberId());
+		log.info("FestaId: {}", request.getFestaId());  // null인지 확인
+		log.info("FestaName: {}", request.getFestaName());
+		log.info("IsOpen: {}", request.getIsOpen());
+
+		Long requesterMemberId = SecurityUtil.getCurrentUserId();
+		StoryItem storyItem = storyService.uploadStoryAsync(request, requesterMemberId);
+		return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storyItem));
 	}
 
 	@GetMapping

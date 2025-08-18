@@ -16,6 +16,8 @@ public class StoryItem {
 	private Boolean isOpen;
 	private String thumbnailUrl;
 	private String festaName;
+	private String processingStatus;
+	private String storyS3Url;
 	private LocalDateTime createdAt;
 
 	public static StoryItem from(Story story) {
@@ -24,8 +26,10 @@ public class StoryItem {
 			.memberId(story.getMemberId())
 			.isOpen(story.getIsOpen())
 			.thumbnailUrl(story.getThumbnailUrl())
+			.storyS3Url(story.getStoryS3Url())
 			.festaName(story.getFestaName())
 			.createdAt(story.getCreatedAt())
+			.processingStatus(story.getProcessingStatus())
 			.build();
 	}
 }

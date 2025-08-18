@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +22,14 @@ import com.oseak.myFestaBackend.common.util.ShortCodeUtil;
 import com.oseak.myFestaBackend.dto.Thumbnail;
 import com.oseak.myFestaBackend.dto.ThumbnailResult;
 import com.oseak.myFestaBackend.dto.request.StorySearchRequestDto;
+import com.oseak.myFestaBackend.dto.request.StoryUploadRequestDto;
 import com.oseak.myFestaBackend.dto.request.StoryVisibilityUpdateRequestDto;
 import com.oseak.myFestaBackend.dto.response.StoryItem;
 import com.oseak.myFestaBackend.entity.Story;
 import com.oseak.myFestaBackend.entity.enums.MediaType;
+import com.oseak.myFestaBackend.entity.enums.ProcessingStatus;
+import com.oseak.myFestaBackend.event.MediaProcessingCompletedEvent;
+import com.oseak.myFestaBackend.event.MediaProcessingEvent;
 import com.oseak.myFestaBackend.generator.ThumbnailGenerator;
 import com.oseak.myFestaBackend.repository.StoryRepository;
 import com.oseak.myFestaBackend.repository.StorySpecification;
@@ -40,6 +46,7 @@ public class StoryService {
 	private final StoryRepository storyRepository;
 	private final ThumbnailGenerator thumbnailGenerator;
 	private final S3Service s3Service;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public Page<StoryItem> search(StorySearchRequestDto request, Long viewerMemberId) {
@@ -304,5 +311,47 @@ public class StoryService {
 		//
 		// return storyRepository.save(story);
 
+	}
+
+	public StoryItem uploadStoryAsync(StoryUploadRequestDto requestDto, Long memberId) {
+		// 1. 미디어 타입 확인
+		MediaType mediaType = MediaType.detectFromFile(requestDto.getFile());
+		log.debug("Starting story upload for mediaType: {}", mediaType);
+
+		// 2. 스토리 저장
+		Story story = Story.builder()
+			.memberId(memberId)
+			.storyType(String.valueOf(mediaType))
+			.festaId(requestDto.getFestaId())
+			.festaName(requestDto.getFestaName())
+			.isOpen(requestDto.getIsOpen())
+			.processingStatus(ProcessingStatus.PROCESSING.name())
+			.build();
+
+		Story savedStory = storyRepository.save(story);
+
+		// 3. 비동기 처리 이벤트 발행
+		eventPublisher.publishEvent(new MediaProcessingEvent(
+			requestDto.getFile(),
+			savedStory.getStoryId(),
+			mediaType
+		));
+
+		// 4. 반환
+		return StoryItem.from(savedStory);
+	}
+
+	@EventListener
+	@Transactional
+	public void handleMediaProcessingCompleted(MediaProcessingCompletedEvent event) {
+		log.debug("Handling media processing completion for storyId: {}, status: {}",
+			event.getStoryId(), event.getStatus());
+
+		Story story = storyRepository.findById(event.getStoryId())
+			.orElseThrow(() -> new OsaekException(STORY_NOT_FOUND));
+
+		story.completeMediaProcessing(event.getOriginalS3Url(), event.getThumbnailS3Url(), event.getStatus().name());
+		storyRepository.save(story);
+		log.debug("Updated story {} with URLs and status: {}", event.getStoryId(), event.getStatus());
 	}
 }

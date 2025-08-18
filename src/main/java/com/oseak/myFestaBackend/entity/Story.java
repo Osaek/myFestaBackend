@@ -55,6 +55,9 @@ public class Story {
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted;
 
+	@Column(name = "processing_status", nullable = true)
+	private String processingStatus;
+
 	@PrePersist
 	protected void onCreate() {
 		this.createdAt = LocalDateTime.now();
