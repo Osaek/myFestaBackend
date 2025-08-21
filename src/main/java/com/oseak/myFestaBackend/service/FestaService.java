@@ -131,7 +131,7 @@ public class FestaService {
 							.festaEndAt(endAt)
 							.areaCode(item.optInt("areacode"))
 							.subAreaCode(item.optInt("sigungucode"))
-							.imageUrl(item.optString("firstimage"))
+							.imageUrl(toHttps(item.optString("firstimage")))
 							.openTime(introMap.get("playtime"))
 							.feeInfo(introMap.get("usetimefestival"))
 							.festaStatus(status)
@@ -367,6 +367,20 @@ public class FestaService {
 			.orElseGet(() -> festaStatisticRepository.save(
 				FestaStatistic.builder().festaId(festaId).build()
 			));
+	}
+
+	private String toHttps(String url) {
+		if (url == null) {
+			return null;
+		}
+		String u = url.trim();
+		if (u.isEmpty()) {
+			return null;
+		}
+		if (u.startsWith("//")) {
+			return "https:" + u;
+		}
+		return u.replaceFirst("^http://", "https://");
 	}
 
 }
