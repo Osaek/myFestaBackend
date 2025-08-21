@@ -18,10 +18,10 @@ import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchItem;
-import com.oseak.myFestaBackend.dto.response.FestaSearchResponse;
+import com.oseak.myFestaBackend.dto.response.FestaSearchItemDto;
+import com.oseak.myFestaBackend.dto.response.FestaSearchResponseDto;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.service.FestaService;
 
@@ -106,16 +106,16 @@ public class FestaController {
 		description = "검색 성공",
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
-	public ResponseEntity<CommonResponse<FestaSearchResponse>> searchFestas(
-		@Parameter(description = "축제 검색 조건") @ModelAttribute FestaSearchRequest request) {
+	public ResponseEntity<CommonResponse<FestaSearchResponseDto>> searchFestas(
+		@Parameter(description = "축제 검색 조건") @ModelAttribute FestaSearchRequestDto request) {
 		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
 			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
 
 		log.debug("전체 요청 객체: {}", request);
-		Page<FestaSearchItem> festas = festaService.search(request);
-		FestaSearchResponse festaSearchResponse = FestaSearchResponse.from(festas);
+		Page<FestaSearchItemDto> festas = festaService.search(request);
+		FestaSearchResponseDto festaSearchResponseDto = FestaSearchResponseDto.from(festas);
 
-		return ResponseEntity.ok(CommonResponse.success(festaSearchResponse));
+		return ResponseEntity.ok(CommonResponse.success(festaSearchResponseDto));
 	}
 
 	@GetMapping("/{festaId}/detail")

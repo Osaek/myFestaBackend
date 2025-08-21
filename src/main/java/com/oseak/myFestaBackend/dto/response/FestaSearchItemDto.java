@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Schema(description = "축제 검색 결과 항목")
-public class FestaSearchItem {
+public class FestaSearchItemDto {
 
 	@Schema(description = "축제 ID", example = "3481597")
 	private Long festaId;
@@ -63,8 +63,8 @@ public class FestaSearchItem {
 	@Schema(description = "축제 상태", example = "ONGOING")
 	private FestaStatus festaStatus;
 
-	public static FestaSearchItem from(Festa festa) {
-		return FestaSearchItem.builder()
+	public static FestaSearchItemDto from(Festa festa) {
+		return FestaSearchItemDto.builder()
 			.festaId(festa.getFestaId())
 			.festaName(festa.getFestaName())
 			.latitude(festa.getLatitude())

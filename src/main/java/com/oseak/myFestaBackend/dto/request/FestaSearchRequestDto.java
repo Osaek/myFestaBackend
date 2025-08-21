@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Schema(description = "축제 검색 요청")
-public class FestaSearchRequest extends PageRequest {
+public class FestaSearchRequestDto extends PageRequest {
 	@Schema(description = "지역 코드", example = "1")
 	private Integer areaCode;
 

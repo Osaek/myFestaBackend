@@ -36,7 +36,7 @@ public class Festa {
 
 	private Double longitude;
 
-	@Column(name = "festa_address")
+	@Column(name = "festa_address", columnDefinition = "TEXT")
 	private String festaAddress;
 
 	@Column(name = "festa_start_at")
@@ -57,13 +57,13 @@ public class Festa {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	@Column(name = "image_url", length = 500)
+	@Column(name = "image_url", columnDefinition = "TEXT")
 	private String imageUrl;
 
-	@Column(name = "open_time")
+	@Column(name = "open_time", columnDefinition = "TEXT")
 	private String openTime;
 
-	@Column(name = "fee_info")
+	@Column(name = "fee_info", columnDefinition = "TEXT")
 	private String feeInfo;
 
 	@Enumerated(EnumType.STRING)

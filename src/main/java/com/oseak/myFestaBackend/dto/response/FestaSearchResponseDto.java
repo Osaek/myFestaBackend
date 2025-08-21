@@ -17,15 +17,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Schema(description = "축제 검색 응답")
-public class FestaSearchResponse {
+public class FestaSearchResponseDto {
 	@Schema(description = "페이징 정보")
 	private PageInfo pageInfo;
 
 	@Schema(description = "축제 목록", example = "[]")
-	private List<FestaSearchItem> festas;
+	private List<FestaSearchItemDto> festas;
 
-	public static FestaSearchResponse from(Page<FestaSearchItem> page) {
-		return FestaSearchResponse.builder()
+	public static FestaSearchResponseDto from(Page<FestaSearchItemDto> page) {
+		return FestaSearchResponseDto.builder()
 			.festas(page.getContent())
 			.pageInfo(PageInfo.of(page))
 			.build();
