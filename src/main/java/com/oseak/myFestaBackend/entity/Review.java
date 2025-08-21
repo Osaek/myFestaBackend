@@ -1,6 +1,6 @@
 package com.oseak.myFestaBackend.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -43,11 +43,11 @@ public class Review {
 
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt;
+	private LocalDate createdAt;
 
 	@UpdateTimestamp
 	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
+	private LocalDate updatedAt;
 
 	@Builder
 	public Review(Long memberId, Festa festa, Double score, String imageUrl, String description) {
