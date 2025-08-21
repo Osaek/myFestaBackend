@@ -31,9 +31,9 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchItem;
+import com.oseak.myFestaBackend.dto.response.FestaSearchItemDto;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.FestaStatistic;
@@ -328,13 +328,13 @@ public class FestaService {
 			.toList();
 	}
 
-	public Page<FestaSearchItem> search(FestaSearchRequest request) {
+	public Page<FestaSearchItemDto> search(FestaSearchRequestDto request) {
 		Specification<Festa> spec = FestaSpecification.createSpecification(request);
 		Pageable pageable = PageRequest.of(request.getValidPage(), request.getValidSize(),
 			Sort.by(Sort.Direction.ASC, "festaStartAt"));
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
-		return page.map(FestaSearchItem::from);
+		return page.map(FestaSearchItemDto::from);
 	}
 
 	public List<DevPickFesta> getDeveloperPicks(int count) {
