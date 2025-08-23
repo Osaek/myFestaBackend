@@ -23,6 +23,10 @@ import lombok.RequiredArgsConstructor;
 public enum ClientErrorCode implements BaseErrorCode {
 	// 검증메시지 관련
 	INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "OSAEK-20001", "validation.invalid_input_value"),
+	// ShortCode관련
+	SHORT_CODE_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-20002", "short.code.invalid"),
+	// 권한 없음
+	FORBIDDEN(HttpStatus.FORBIDDEN, "OSAEK-20003", "validation.forbidden"),
 	// 회원 조회 관련
 	USER_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10001", "user.id.not_found"),
 	USER_EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10002", "user.email.not_found"),
@@ -56,7 +60,24 @@ public enum ClientErrorCode implements BaseErrorCode {
 	OAUTH_PASSWORD_CANT_CHANGE(HttpStatus.NOT_ACCEPTABLE, "OSAEK-10217", "password.cant_change"),
 
 	// 지역 코드 관련
-	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-30001", "area.code.not_found"),
+	AREA_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-10009", "area.code.not_found"),
+  
+	// S3 코드 관련
+	S3_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10510", "s3.upload.fail"),
+	S3_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10511", "s3.delete.fail"),
+
+	// 스토리 관련
+	STORY_CODE_INVALID(HttpStatus.BAD_REQUEST, "OSAEK-30001", "story.code.invalid"),
+	STORY_NOT_FOUND(HttpStatus.NOT_FOUND, "OSAEK-30002", "story.not_found"),
+	UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "OSAEK-10511", "unsupported.media_type"),
+	THUMBNAIL_CANT_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10512", "thumbnail.cant_create"),
+	TEMPFILE_CANT_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10513", "tempfile.cant_create"),
+
+	// 미디어 업로드 관련
+	FILE_EMPTY(HttpStatus.BAD_REQUEST, "OSAEK-10514", "file.empty"),
+	FILE_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "OSAEK-10515", "file.size_exceed"),
+	MEDIA_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10516", "media.upload.fail"),
+	THUMBNAIL_GENERATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "OSAEK-10517", "thumbnail.generation.fail"),
 
 	// 축제 관련
 	FESTA_ID_NULL(HttpStatus.BAD_REQUEST, "OSAEK-30002", "festa.id.null"),

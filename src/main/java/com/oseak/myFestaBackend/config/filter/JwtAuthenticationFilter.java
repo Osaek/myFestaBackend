@@ -44,9 +44,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			final String authorizationHeader = request.getHeader("Authorization");
 			String jwt = null;
 
+			log.debug("Processing request: {} with Authorization header: {}",
+				request.getRequestURI(), authorizationHeader != null ? "present" : "missing");
+
 			// Authorization 헤더에서 JWT 토큰 추출
 			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 				jwt = jwtUtil.resolveToken(authorizationHeader);
+				log.debug("Extracted JWT token: {}", jwt != null ? "valid" : "null");
 
 				if (jwt != null && jwtUtil.isAccessToken(jwt)) {
 					if (jwtUtil.validateToken(jwt)) {
@@ -92,6 +96,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		Long memberId = Long.parseLong(claims.getSubject());
 		String nickname = claims.get("nickname", String.class);
 		Provider provider = Provider.valueOf(claims.get("provider", String.class));
+
+		log.debug("Authenticating user - memberId: {}, email: {}, nickname: {}", memberId, email, nickname);
 
 		Member member = Member.builder()
 			.email(email)
