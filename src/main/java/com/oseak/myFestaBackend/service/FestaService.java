@@ -31,15 +31,17 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestaSearchRequest;
+import com.oseak.myFestaBackend.dto.request.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchItem;
+import com.oseak.myFestaBackend.dto.response.FestaSearchItemDto;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.entity.Festa;
+import com.oseak.myFestaBackend.entity.FestaStatistic;
 import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 import com.oseak.myFestaBackend.repository.DevPickFestaRepository;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 import com.oseak.myFestaBackend.repository.FestaSpecification;
+import com.oseak.myFestaBackend.repository.FestaStatisticRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +56,7 @@ public class FestaService {
 	private final DevPickFestaRepository devPickFestaRepository;
 	private final WebClient webClient;
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final FestaStatisticRepository festaStatisticRepository;
 
 	@Value("${tourapi.url}")
 	private String baseUrl;
@@ -96,49 +99,59 @@ public class FestaService {
 			for (int i = 0; i < items.length(); i++) {
 				JSONObject item = items.getJSONObject(i);
 				String title = item.optString("title");
-				LocalDate startAt = parseDate(item.optString("eventstartdate"));
-				LocalDate endAt = parseDate(item.optString("eventenddate"));
 				Long festaId = item.optLong("contentid");
-				Long contentTypeId = item.optLong("contenttypeid");
 
-				FestaStatus status = getStatusByDate(startAt, endAt);
-				Map<String, String> detailMap = fetchFestaDetails(festaId, contentTypeId);
-				Map<String, String> introMap = fetchFestaIntro(festaId, contentTypeId);
+				try {
+					LocalDate startAt = parseDate(item.optString("eventstartdate"));
+					LocalDate endAt = parseDate(item.optString("eventenddate"));
 
-				Optional<Festa> optionalFesta = festaRepository.findById(festaId);
-				if (optionalFesta.isPresent()) {
-					log.info("기존 '{}' 행사 (festaId: {}) 업데이트 실행", title, festaId);
-					Festa festa = optionalFesta.get();
-					festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
-					festa.updateIntro(introMap.get("playtime"), introMap.get("usetimefestival"));
-					festa.updateStatus(status);
-					festaRepository.save(festa);
-				} else {
-					log.info("신규 '{}' 행사 (festaId: {}) 저장 실행", title, festaId);
-					Festa festa = Festa.builder()
-						.festaId(festaId)
-						.festaName(title)
-						.latitude(item.optDouble("mapy"))
-						.longitude(item.optDouble("mapx"))
-						.festaAddress(item.optString("addr1"))
-						.festaStartAt(startAt)
-						.festaEndAt(endAt)
-						.areaCode(item.optInt("areacode"))
-						.subAreaCode(item.optInt("sigungucode"))
-						.imageUrl(item.optString("firstimage"))
-						.openTime(introMap.get("playtime"))
-						.feeInfo(introMap.get("usetimefestival"))
-						.festaStatus(status)
-						.overview(detailMap.get("overview"))
-						.description(detailMap.get("description"))
-						.build();
-					festaRepository.save(festa);
+					Long contentTypeId = item.optLong("contenttypeid");
+
+					FestaStatus status = getStatusByDate(startAt, endAt);
+					Map<String, String> detailMap = fetchFestaDetails(festaId, contentTypeId);
+					Map<String, String> introMap = fetchFestaIntro(festaId, contentTypeId);
+
+					Optional<Festa> optionalFesta = festaRepository.findById(festaId);
+					if (optionalFesta.isPresent()) {
+						log.info("기존 '{}' 행사 (festaId: {}) 업데이트 실행", title, festaId);
+						Festa festa = optionalFesta.get();
+						festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
+						festa.updateIntro(introMap.get("playtime"), introMap.get("usetimefestival"));
+						festa.updateStatus(status);
+						festaRepository.save(festa);
+					} else {
+						log.info("신규 '{}' 행사 (festaId: {}) 저장 실행", title, festaId);
+						Festa festa = Festa.builder()
+							.festaId(festaId)
+							.festaName(title)
+							.latitude(item.optDouble("mapy"))
+							.longitude(item.optDouble("mapx"))
+							.festaAddress(item.optString("addr1"))
+							.festaStartAt(startAt)
+							.festaEndAt(endAt)
+							.areaCode(item.optInt("areacode"))
+							.subAreaCode(item.optInt("sigungucode"))
+							.imageUrl(toHttps(item.optString("firstimage")))
+							.openTime(introMap.get("playtime"))
+							.feeInfo(introMap.get("usetimefestival"))
+							.festaStatus(status)
+							.overview(detailMap.get("overview"))
+							.description(detailMap.get("description"))
+							.build();
+						festaRepository.save(festa);
+					}
+					getOrCreateFestaStatistic(festaId);
+				} catch (Exception exception) {
+					// 해당 건만 스킵하고 계속 진행
+					log.warn("축제 처리 실패 - festaId={}, title='{}', 원인={}", festaId, title, exception.toString(),
+						exception);
 				}
 			}
 		} catch (WebClientResponseException e) {
-			throw new OsaekException(ServerErrorCode.SERVICE_UNAVAILABLE);
+			log.warn("searchFestival2 호출 실패 (areaCode={}, status={}, body={})",
+				areaCode, e.getStatusCode(), e.getResponseBodyAsString());
 		} catch (Exception e) {
-			throw new OsaekException(ServerErrorCode.UNKNOWN_SERVER_ERROR);
+			log.warn("축제 목록 수집 실패 (areaCode={}): {}", areaCode, e.getMessage(), e);
 		}
 	}
 
@@ -315,13 +328,13 @@ public class FestaService {
 			.toList();
 	}
 
-	public Page<FestaSearchItem> search(FestaSearchRequest request) {
+	public Page<FestaSearchItemDto> search(FestaSearchRequestDto request) {
 		Specification<Festa> spec = FestaSpecification.createSpecification(request);
 		Pageable pageable = PageRequest.of(request.getValidPage(), request.getValidSize(),
 			Sort.by(Sort.Direction.ASC, "festaStartAt"));
 
 		Page<Festa> page = festaRepository.findAll(spec, pageable);
-		return page.map(FestaSearchItem::from);
+		return page.map(FestaSearchItemDto::from);
 	}
 
 	public List<DevPickFesta> getDeveloperPicks(int count) {
@@ -347,6 +360,27 @@ public class FestaService {
 
 		log.debug("축제 상세 정보 조회 완료: id={}, name={}", id, festa.getFestaName());
 		return responseDto;
+	}
+
+	private FestaStatistic getOrCreateFestaStatistic(Long festaId) {
+		return festaStatisticRepository.findById(festaId)
+			.orElseGet(() -> festaStatisticRepository.save(
+				FestaStatistic.builder().festaId(festaId).build()
+			));
+	}
+
+	private String toHttps(String url) {
+		if (url == null) {
+			return null;
+		}
+		String u = url.trim();
+		if (u.isEmpty()) {
+			return null;
+		}
+		if (u.startsWith("//")) {
+			return "https:" + u;
+		}
+		return u.replaceFirst("^http://", "https://");
 	}
 
 }
