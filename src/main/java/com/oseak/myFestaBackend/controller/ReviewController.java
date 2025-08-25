@@ -22,6 +22,7 @@ import com.oseak.myFestaBackend.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -40,6 +41,17 @@ public class ReviewController {
 	@Operation(
 		summary = "리뷰 생성",
 		description = "회원이 특정 축제에 대해 리뷰(점수/이미지/본문)를 작성",
+		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+			required = true,
+			content = @Content(
+				schema = @Schema(implementation = ReviewRequestDto.class),
+				examples = @ExampleObject(
+					value = "{ \"memberId\": 101, \"festaId\": 2612919, \"score\": 4.5, " +
+						"\"imageUrl\": \"https://example.com/rev1.jpg\", " +
+						"\"description\": \"분위기 좋고 재밌었어요!\" }"
+				)
+			)
+		),
 		responses = {
 			@ApiResponse(responseCode = "200", description = "리뷰 생성 성공",
 				content = @Content(schema = @Schema(implementation = CommonResponse.class)))
@@ -58,6 +70,17 @@ public class ReviewController {
 	@Operation(
 		summary = "리뷰 수정",
 		description = "리뷰 수정",
+		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+			required = true,
+			content = @Content(
+				schema = @Schema(implementation = ReviewRequestDto.class),
+				examples = @ExampleObject(
+					value = "{ \"memberId\": 101, \"festaId\": 2612919, \"score\": 5.0, " +
+						"\"imageUrl\": \"https://example.com/rev1-updated.jpg\", " +
+						"\"description\": \"다시 가도 좋을 축제!\" }"
+				)
+			)
+		),
 		responses = {
 			@ApiResponse(responseCode = "200", description = "리뷰 수정 성공",
 				content = @Content(schema = @Schema(implementation = CommonResponse.class)))
