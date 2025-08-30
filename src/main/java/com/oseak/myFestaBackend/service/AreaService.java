@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.oseak.myFestaBackend.common.exception.OsaekException;
-import com.oseak.myFestaBackend.dto.response.AllSubAreaResponseDto;
-import com.oseak.myFestaBackend.dto.response.AreaResponseDto;
-import com.oseak.myFestaBackend.dto.response.SubAreaResponseDto;
+import com.oseak.myFestaBackend.dto.search.AllSubAreaResponseDto;
+import com.oseak.myFestaBackend.dto.search.AreaResponseDto;
+import com.oseak.myFestaBackend.dto.search.SubAreaResponseDto;
 import com.oseak.myFestaBackend.entity.Area;
 import com.oseak.myFestaBackend.entity.SubArea;
 import com.oseak.myFestaBackend.repository.AreaRepository;
