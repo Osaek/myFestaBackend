@@ -1,4 +1,4 @@
-package com.oseak.myFestaBackend.dto.request;
+package com.oseak.myFestaBackend.dto.search;
 
 import java.time.LocalDate;
 

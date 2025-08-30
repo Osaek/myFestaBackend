@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import com.oseak.myFestaBackend.dto.request.FestaSearchRequestDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.entity.Festa;
 
 public class FestaSpecification {

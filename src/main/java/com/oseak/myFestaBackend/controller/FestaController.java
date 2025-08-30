@@ -18,10 +18,10 @@ import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchItemDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchResponseDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchItemDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchResponseDto;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.service.FestaService;
 
