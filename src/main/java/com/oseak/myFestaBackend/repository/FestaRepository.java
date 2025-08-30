@@ -1,7 +1,6 @@
 package com.oseak.myFestaBackend.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -10,9 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import com.oseak.myFestaBackend.entity.Festa;
 
 public interface FestaRepository extends JpaRepository<Festa, Long>, JpaSpecificationExecutor<Festa> {
-	Optional<Festa> findByFestaName(String festaName);
-
-	Optional<Festa> findByFestaNameAndFestaStartAt(String festaName, LocalDate festaStartAt);
 
 	List<Festa> findAllByFestaIdIn(List<Long> festaIds);
 
