@@ -1,8 +1,10 @@
 package com.oseak.myFestaBackend.dto.search;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.oseak.myFestaBackend.common.request.PageRequest;
+import com.oseak.myFestaBackend.entity.enums.FestaStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -32,5 +34,8 @@ public class FestaSearchRequestDto extends PageRequest {
 
 	@Schema(description = "축제 종료일", example = "2024-05-31")
 	private LocalDate endDate;
+
+	@Schema(description = "축제 진행 상태", example = "SCHEDULED")
+	private List<FestaStatus> festaStatuses;
 }
 
