@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -107,7 +107,7 @@ public class FestaController {
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
 	public ResponseEntity<CommonResponse<FestaSearchResponseDto>> searchFestas(
-		@Parameter(description = "축제 검색 조건") @ModelAttribute FestaSearchRequestDto request) {
+		@Parameter(description = "축제 검색 조건") @ParameterObject FestaSearchRequestDto request) {
 		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
 			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
 

@@ -93,7 +93,7 @@ public class FestaSpecification {
 		return (root, query, cb) -> {
 			if (statuses == null || statuses.isEmpty())
 				return cb.conjunction();
-			return root.get("status").in(statuses);
+			return root.get("festaStatus").in(statuses);
 		};
 	}
 
