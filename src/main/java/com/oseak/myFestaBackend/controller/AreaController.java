@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oseak.myFestaBackend.common.response.CommonResponse;
-import com.oseak.myFestaBackend.dto.response.AllSubAreaResponseDto;
-import com.oseak.myFestaBackend.dto.response.AreaResponseDto;
-import com.oseak.myFestaBackend.dto.response.SubAreaResponseDto;
+import com.oseak.myFestaBackend.dto.search.AllSubAreaResponseDto;
+import com.oseak.myFestaBackend.dto.search.AreaResponseDto;
+import com.oseak.myFestaBackend.dto.search.SubAreaResponseDto;
 import com.oseak.myFestaBackend.service.AreaService;
 
 import io.swagger.v3.oas.annotations.Operation;

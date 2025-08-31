@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,10 +18,10 @@ import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
-import com.oseak.myFestaBackend.dto.request.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchItemDto;
-import com.oseak.myFestaBackend.dto.response.FestaSearchResponseDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchItemDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
+import com.oseak.myFestaBackend.dto.search.FestaSearchResponseDto;
 import com.oseak.myFestaBackend.entity.DevPickFesta;
 import com.oseak.myFestaBackend.service.FestaService;
 
@@ -107,7 +107,7 @@ public class FestaController {
 		content = @Content(schema = @Schema(implementation = CommonResponse.class))
 	)
 	public ResponseEntity<CommonResponse<FestaSearchResponseDto>> searchFestas(
-		@Parameter(description = "축제 검색 조건") @ModelAttribute FestaSearchRequestDto request) {
+		@Parameter(description = "축제 검색 조건") @ParameterObject FestaSearchRequestDto request) {
 		log.debug("받은 검색 요청: areaCode={}, subAreaCode={}, keyword={}",
 			request.getAreaCode(), request.getSubAreaCode(), request.getKeyword());
 
