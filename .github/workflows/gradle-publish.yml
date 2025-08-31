@@ -20,7 +20,6 @@ env:
   IMAGE_NAME: osaek/myfestabackend
   EC2_HOST: ${{ secrets.EC2_HOST }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
   KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
   KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
   KAKAO_REDIRECT_URL: ${{ secrets.KAKAO_REDIRECT_URL }}
