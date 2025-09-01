@@ -2,6 +2,7 @@ package com.oseak.myFestaBackend.dto.response;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.oseak.myFestaBackend.entity.Festa;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,10 +27,12 @@ public class FestaDetailResponseDto {
 	@Schema(description = "축제 주소", example = "서울특별시 중구 정동길 3 (정동)")
 	private String festaAddress;
 
-	@Schema(description = "축제 시작일", example = "2022-11-01")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
+	@Schema(description = "축제 시작일", example = "2025.06.23")
 	private LocalDate festaStartAt;
 
-	@Schema(description = "축제 종료일", example = "2025-12-31")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
+	@Schema(description = "축제 종료일", example = "2025.06.30")
 	private LocalDate festaEndAt;
 
 	@Schema(description = "개요", example = "2008년 초연된 페인터즈는 화려한 안무와 라이브 드로잉...")
