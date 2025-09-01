@@ -115,8 +115,10 @@ public class FestaService {
 					if (optionalFesta.isPresent()) {
 						log.info("기존 '{}' 행사 (festaId: {}) 업데이트 실행", title, festaId);
 						Festa festa = optionalFesta.get();
-						festa.updateContent(detailMap.get("overview"), detailMap.get("description"));
-						festa.updateIntro(introMap.get("playtime"), introMap.get("usetimefestival"));
+						festa.updateContent(brToNewLine(detailMap.get("overview")),
+							brToNewLine(detailMap.get("description")));
+						festa.updateIntro(brToNewLine(introMap.get("playtime")),
+							brToNewLine(introMap.get("usetimefestival")));
 						festa.updateStatus(status);
 						festaRepository.save(festa);
 					} else {
@@ -132,11 +134,11 @@ public class FestaService {
 							.areaCode(item.optInt("areacode"))
 							.subAreaCode(item.optInt("sigungucode"))
 							.imageUrl(toHttps(item.optString("firstimage")))
-							.openTime(introMap.get("playtime"))
-							.feeInfo(introMap.get("usetimefestival"))
+							.openTime(brToNewLine(introMap.get("playtime")))
+							.feeInfo(brToNewLine(introMap.get("usetimefestival")))
 							.festaStatus(status)
-							.overview(detailMap.get("overview"))
-							.description(detailMap.get("description"))
+							.overview(brToNewLine(detailMap.get("overview")))
+							.description(brToNewLine(detailMap.get("description")))
 							.build();
 						festaRepository.save(festa);
 					}
@@ -381,6 +383,13 @@ public class FestaService {
 			return "https:" + u;
 		}
 		return u.replaceFirst("^http://", "https://");
+	}
+
+	private String brToNewLine(String s) {
+		if (s == null) {
+			return null;
+		}
+		return s.replaceAll("(?i)<br\\s*/?>", "\n");
 	}
 
 }
