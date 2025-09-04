@@ -70,6 +70,9 @@ public class Festa {
 	@Column(name = "festa_status", nullable = false)
 	private FestaStatus festaStatus;
 
+	@Column(name = "festa_url", columnDefinition = "TEXT")
+	private String festaUrl;
+
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)
 	private LocalDateTime createdAt;
@@ -82,7 +85,7 @@ public class Festa {
 	public Festa(Long festaId, String festaName, Double latitude, Double longitude, String festaAddress,
 		LocalDate festaStartAt, LocalDate festaEndAt, Integer areaCode, Integer subAreaCode,
 		String overview, String description, String imageUrl, String openTime, String feeInfo,
-		FestaStatus festaStatus) {
+		FestaStatus festaStatus, String festaUrl) {
 		this.festaId = festaId;
 		this.festaName = festaName;
 		this.latitude = latitude;
@@ -98,6 +101,7 @@ public class Festa {
 		this.openTime = openTime;
 		this.feeInfo = feeInfo;
 		this.festaStatus = festaStatus;
+		this.festaUrl = festaUrl;
 	}
 
 	public void updateContent(String overview, String description) {
@@ -111,6 +115,12 @@ public class Festa {
 		}
 		if (feeInfo != null && !feeInfo.isBlank()) {
 			this.feeInfo = feeInfo;
+		}
+	}
+
+	public void updateUrl(String festaUrl) {
+		if (festaUrl != null && !festaUrl.isBlank()) {
+			this.festaUrl = festaUrl;
 		}
 	}
 
