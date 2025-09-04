@@ -31,6 +31,7 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
+import com.oseak.myFestaBackend.dto.request.FestaNearRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchItemDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
@@ -289,18 +290,18 @@ public class FestaService {
 		log.info("축제 진행상태 업데이트 완료");
 	}
 
-	/*TODO : festa 정보 저장될 때 festa_statistic도 같이 만들어줘야함.
-		user_like좀 넣고 festa_statistic 도 넣고 해야 추천 API만들 듯.
-	*/
-
-	public List<FestaSimpleDto> findNearbyFesta(double latitude, double longitude, int distanceKm) {
-		if (!List.of(1, 5, 10, 20).contains(distanceKm)) {
+	public Page<FestaSimpleDto> findNearbyFesta(FestaNearRequestDto req) {
+		if (req.getLatitude() == null || req.getLongitude() == null) {
 			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
 		}
-
-		return festaRepository.findByDistance(latitude, longitude, distanceKm).stream()
-			.map(FestaSimpleDto::from)
-			.toList();
+		Pageable pageable = PageRequest.of(req.getValidPage(), req.getValidSize());
+		Page<Festa> page = festaRepository.findByDistance(
+			req.getLatitude(),
+			req.getLongitude(),
+			req.getValidDistanceKm(),
+			pageable
+		);
+		return page.map(FestaSimpleDto::from);
 	}
 
 	public List<FestaSummaryDto> getFestaSummariesByFestaIds(List<Long> festaIds) {
