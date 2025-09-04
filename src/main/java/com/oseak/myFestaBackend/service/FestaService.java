@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -111,6 +113,9 @@ public class FestaService {
 					FestaStatus status = getStatusByDate(startAt, endAt);
 					Map<String, String> detailMap = fetchFestaDetails(festaId, contentTypeId);
 					Map<String, String> introMap = fetchFestaIntro(festaId, contentTypeId);
+					Map<String, String> commonMap = fetchFestaCommon(festaId, contentTypeId);
+
+					String festaUrl = commonMap.get("homepage");
 
 					Optional<Festa> optionalFesta = festaRepository.findById(festaId);
 					if (optionalFesta.isPresent()) {
@@ -120,6 +125,7 @@ public class FestaService {
 							brToNewLine(detailMap.get("description")));
 						festa.updateIntro(brToNewLine(introMap.get("playtime")),
 							brToNewLine(introMap.get("usetimefestival")));
+						festa.updateUrl(festaUrl);
 						festa.updateStatus(status);
 						festaRepository.save(festa);
 					} else {
@@ -140,6 +146,7 @@ public class FestaService {
 							.festaStatus(status)
 							.overview(brToNewLine(detailMap.get("overview")))
 							.description(brToNewLine(detailMap.get("description")))
+							.festaUrl(festaUrl)
 							.build();
 						festaRepository.save(festa);
 					}
@@ -242,6 +249,62 @@ public class FestaService {
 			throw new OsaekException(ServerErrorCode.SERVICE_UNAVAILABLE);
 		} catch (Exception e) {
 			throw new OsaekException(ServerErrorCode.MALFORMED_RESPONSE);
+		}
+		return result;
+	}
+
+	private Map<String, String> fetchFestaCommon(Long contentId, Long contentTypeId) {
+		Map<String, String> result = new HashMap<>();
+		try {
+			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/detailCommon2")
+				.queryParam("MobileOS", "ETC")
+				.queryParam("MobileApp", UriUtils.encode("오색", StandardCharsets.UTF_8))
+				.queryParam("_type", "json")
+				.queryParam("contentId", contentId)
+				.queryParam("serviceKey", serviceKey)
+				.build(true)
+				.toUri();
+
+			String response = webClient.get()
+				.uri(uri)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			JSONObject resp = new JSONObject(response).optJSONObject("response");
+			if (resp == null) {
+				return result;
+			}
+
+			JSONObject body = resp.optJSONObject("body");
+			if (body == null) {
+				return result;
+			}
+
+			JSONObject items = body.optJSONObject("items");
+			if (items == null) {
+				return result;
+			}
+
+			Object node = items.opt("item");
+			JSONObject item = null;
+			if (node instanceof JSONArray arr && arr.length() > 0) {
+				item = arr.optJSONObject(0);
+			} else if (node instanceof JSONObject jo) {
+				item = jo;
+			}
+			if (item == null)
+				return result;
+
+			String homepageRaw = optStringOrNull(item, "homepage");
+			String homepage = normalizeHomepage(homepageRaw);
+			result.put("homepage", homepage); // null이면 그대로 null로 저장하도록
+
+		} catch (WebClientResponseException e) {
+			log.warn("detailCommon2 호출 실패 (contentId={}, status={}, body={})",
+				contentId, e.getStatusCode(), e.getResponseBodyAsString());
+		} catch (Exception e) {
+			log.warn("detailCommon2 파싱 실패 (contentId={}): {}", contentId, e.toString());
 		}
 		return result;
 	}
@@ -391,6 +454,59 @@ public class FestaService {
 			return null;
 		}
 		return s.replaceAll("(?i)<br\\s*/?>", "\n");
+	}
+
+	private String unescapeHtml(String s) {
+		if (s == null)
+			return null;
+		return s.replace("&lt;", "<")
+			.replace("&gt;", ">")
+			.replace("&quot;", "\"")
+			.replace("&#39;", "'")
+			.replace("&apos;", "'")
+			.replace("&amp;", "&");
+	}
+
+	private String normalizeHomepage(String raw) {
+		if (raw == null)
+			return null;
+		String t = raw.trim();
+		if (t.isEmpty())
+			return null;
+
+		// 엔티티 언이스케이프
+		t = unescapeHtml(t);
+
+		// 2) href="...": 따옴표 안 값만 빼기
+		Matcher mHref = Pattern.compile(
+			"href\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]",
+			Pattern.CASE_INSENSITIVE
+		).matcher(t);
+
+		String url = null;
+		if (mHref.find()) {
+			url = mHref.group(1).trim();
+		} else {
+			String noTags = t.replaceAll("(?s)<[^>]*>", " ");
+			Matcher mUrl = Pattern.compile(
+				"(?i)\\b((?:https?://|//|www\\.)[^\\s<]+)"
+			).matcher(noTags);
+			if (mUrl.find())
+				url = mUrl.group(1).trim();
+		}
+
+		if (url == null || url.isEmpty())
+			return null;
+
+		// 4) 스킴 보정 + 꼬리 문장부호 제거
+		if (url.startsWith("www."))
+			url = "https://" + url;
+		if (url.startsWith("//"))
+			url = "https:" + url;
+		url = url.replaceFirst("^http://", "https://");
+		url = url.replaceAll("[)\\]\\.,;]+$", ""); // 끝에 붙은 ) ] . , ; 등 제거
+
+		return url.isEmpty() ? null : url;
 	}
 
 }
