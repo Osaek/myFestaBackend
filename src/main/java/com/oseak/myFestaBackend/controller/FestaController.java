@@ -20,6 +20,7 @@ import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
 import com.oseak.myFestaBackend.dto.request.FestaNearRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
+import com.oseak.myFestaBackend.dto.response.FestaNearResponseDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchItemDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchResponseDto;
@@ -55,9 +56,10 @@ public class FestaController {
 		description = "현재 위치(lat, lng)를 기준으로 특정 거리 내에 있는 축제를 조회합니다."
 	)
 	@GetMapping("/nearby")
-	public ResponseEntity<CommonResponse<Page<FestaSimpleDto>>> getNearbyFestasIds(@ParameterObject
+	public ResponseEntity<CommonResponse<FestaNearResponseDto>> getNearbyFestasIds(@ParameterObject
 	FestaNearRequestDto festaNearRequestDto) {
-		return ResponseEntity.ok(CommonResponse.success(festaService.findNearbyFesta(festaNearRequestDto)));
+		Page<FestaSimpleDto> page = festaService.findNearbyFesta(festaNearRequestDto);
+		return ResponseEntity.ok(CommonResponse.success(FestaNearResponseDto.from(page)));
 	}
 
 	@Operation(
