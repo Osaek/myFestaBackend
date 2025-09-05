@@ -50,6 +50,9 @@ public class FestaDetailResponseDto {
 	@Schema(description = "요금 정보", example = "성인 15,000원, 청소년 12,000원")
 	private String feeInfo;
 
+	@Schema(description = "축제 홈페이지", example = "https://www.aaa.com")
+	private String festaUrl;
+
 	public static FestaDetailResponseDto from(Festa festa) {
 		return FestaDetailResponseDto.builder()
 			.festaId(festa.getFestaId())
@@ -62,6 +65,7 @@ public class FestaDetailResponseDto {
 			.imageUrl(festa.getImageUrl())
 			.openTime(festa.getOpenTime())
 			.feeInfo(festa.getFeeInfo())
+			.festaUrl(festa.getFestaUrl())
 			.build();
 	}
 }

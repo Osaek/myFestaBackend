@@ -1,0 +1,35 @@
+package com.oseak.myFestaBackend.dto.response;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+
+import com.oseak.myFestaBackend.common.response.PageInfo;
+import com.oseak.myFestaBackend.dto.FestaSimpleDto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Schema(description = "근처 축제 조회 응답")
+public class FestaNearResponseDto {
+
+	@Schema(description = "페이징 정보")
+	private PageInfo pageInfo;
+
+	@Schema(description = "축제 목록")
+	private List<FestaSimpleDto> festas;
+
+	public static FestaNearResponseDto from(Page<FestaSimpleDto> page) {
+		return FestaNearResponseDto.builder()
+			.pageInfo(PageInfo.of(page))
+			.festas(page.getContent())
+			.build();
+	}
+}

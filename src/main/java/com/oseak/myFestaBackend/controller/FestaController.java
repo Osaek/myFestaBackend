@@ -18,7 +18,9 @@ import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
+import com.oseak.myFestaBackend.dto.request.FestaNearRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
+import com.oseak.myFestaBackend.dto.response.FestaNearResponseDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchItemDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchResponseDto;
@@ -51,21 +53,13 @@ public class FestaController {
 
 	@Operation(
 		summary = "근처 축제 조회",
-		description = "현재 위치(lat, lng)를 기준으로 특정 거리 내에 있는 축제를 조회합니다.",
-		parameters = {
-			@Parameter(name = "lat", description = "위도", required = true, example = "37.5665"),
-			@Parameter(name = "lng", description = "경도", required = true, example = "126.9780"),
-			@Parameter(name = "distance", description = "검색 반경 (km)", required = true, example = "10")
-		},
-		responses = {
-			@ApiResponse(responseCode = "200", description = "축제 목록 반환", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FestaSimpleDto.class)))
-		}
+		description = "현재 위치(lat, lng)를 기준으로 특정 거리 내에 있는 축제를 조회합니다."
 	)
 	@GetMapping("/nearby")
-	public ResponseEntity<CommonResponse<List<FestaSimpleDto>>> getNearbyFestasIds(@RequestParam double lat,
-		@RequestParam double lng,
-		@RequestParam int distance) {
-		return ResponseEntity.ok(CommonResponse.success(festaService.findNearbyFesta(lat, lng, distance)));
+	public ResponseEntity<CommonResponse<FestaNearResponseDto>> getNearbyFestasIds(@ParameterObject
+	FestaNearRequestDto festaNearRequestDto) {
+		Page<FestaSimpleDto> page = festaService.findNearbyFesta(festaNearRequestDto);
+		return ResponseEntity.ok(CommonResponse.success(FestaNearResponseDto.from(page)));
 	}
 
 	@Operation(

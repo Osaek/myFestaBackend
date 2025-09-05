@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,6 +33,7 @@ import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.FestaSimpleDto;
 import com.oseak.myFestaBackend.dto.FestaSummaryDto;
+import com.oseak.myFestaBackend.dto.request.FestaNearRequestDto;
 import com.oseak.myFestaBackend.dto.response.FestaDetailResponseDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchItemDto;
 import com.oseak.myFestaBackend.dto.search.FestaSearchRequestDto;
@@ -110,6 +113,9 @@ public class FestaService {
 					FestaStatus status = getStatusByDate(startAt, endAt);
 					Map<String, String> detailMap = fetchFestaDetails(festaId, contentTypeId);
 					Map<String, String> introMap = fetchFestaIntro(festaId, contentTypeId);
+					Map<String, String> commonMap = fetchFestaCommon(festaId, contentTypeId);
+
+					String festaUrl = commonMap.get("homepage");
 
 					Optional<Festa> optionalFesta = festaRepository.findById(festaId);
 					if (optionalFesta.isPresent()) {
@@ -119,6 +125,7 @@ public class FestaService {
 							brToNewLine(detailMap.get("description")));
 						festa.updateIntro(brToNewLine(introMap.get("playtime")),
 							brToNewLine(introMap.get("usetimefestival")));
+						festa.updateUrl(festaUrl);
 						festa.updateStatus(status);
 						festaRepository.save(festa);
 					} else {
@@ -139,6 +146,7 @@ public class FestaService {
 							.festaStatus(status)
 							.overview(brToNewLine(detailMap.get("overview")))
 							.description(brToNewLine(detailMap.get("description")))
+							.festaUrl(festaUrl)
 							.build();
 						festaRepository.save(festa);
 					}
@@ -245,6 +253,62 @@ public class FestaService {
 		return result;
 	}
 
+	private Map<String, String> fetchFestaCommon(Long contentId, Long contentTypeId) {
+		Map<String, String> result = new HashMap<>();
+		try {
+			URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/detailCommon2")
+				.queryParam("MobileOS", "ETC")
+				.queryParam("MobileApp", UriUtils.encode("오색", StandardCharsets.UTF_8))
+				.queryParam("_type", "json")
+				.queryParam("contentId", contentId)
+				.queryParam("serviceKey", serviceKey)
+				.build(true)
+				.toUri();
+
+			String response = webClient.get()
+				.uri(uri)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			JSONObject resp = new JSONObject(response).optJSONObject("response");
+			if (resp == null) {
+				return result;
+			}
+
+			JSONObject body = resp.optJSONObject("body");
+			if (body == null) {
+				return result;
+			}
+
+			JSONObject items = body.optJSONObject("items");
+			if (items == null) {
+				return result;
+			}
+
+			Object node = items.opt("item");
+			JSONObject item = null;
+			if (node instanceof JSONArray arr && arr.length() > 0) {
+				item = arr.optJSONObject(0);
+			} else if (node instanceof JSONObject jo) {
+				item = jo;
+			}
+			if (item == null)
+				return result;
+
+			String homepageRaw = optStringOrNull(item, "homepage");
+			String homepage = normalizeHomepage(homepageRaw);
+			result.put("homepage", homepage); // null이면 그대로 null로 저장하도록
+
+		} catch (WebClientResponseException e) {
+			log.warn("detailCommon2 호출 실패 (contentId={}, status={}, body={})",
+				contentId, e.getStatusCode(), e.getResponseBodyAsString());
+		} catch (Exception e) {
+			log.warn("detailCommon2 파싱 실패 (contentId={}): {}", contentId, e.toString());
+		}
+		return result;
+	}
+
 	private String optStringOrNull(JSONObject o, String key) {
 		String v = o.optString(key, null);
 		return (v == null || v.isBlank()) ? null : v;
@@ -289,18 +353,18 @@ public class FestaService {
 		log.info("축제 진행상태 업데이트 완료");
 	}
 
-	/*TODO : festa 정보 저장될 때 festa_statistic도 같이 만들어줘야함.
-		user_like좀 넣고 festa_statistic 도 넣고 해야 추천 API만들 듯.
-	*/
-
-	public List<FestaSimpleDto> findNearbyFesta(double latitude, double longitude, int distanceKm) {
-		if (!List.of(1, 5, 10, 20).contains(distanceKm)) {
+	public Page<FestaSimpleDto> findNearbyFesta(FestaNearRequestDto req) {
+		if (req.getLatitude() == null || req.getLongitude() == null) {
 			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
 		}
-
-		return festaRepository.findByDistance(latitude, longitude, distanceKm).stream()
-			.map(FestaSimpleDto::from)
-			.toList();
+		Pageable pageable = PageRequest.of(req.getValidPage(), req.getValidSize());
+		Page<Festa> page = festaRepository.findByDistance(
+			req.getLatitude(),
+			req.getLongitude(),
+			req.getValidDistanceKm(),
+			pageable
+		);
+		return page.map(FestaSimpleDto::from);
 	}
 
 	public List<FestaSummaryDto> getFestaSummariesByFestaIds(List<Long> festaIds) {
@@ -390,6 +454,59 @@ public class FestaService {
 			return null;
 		}
 		return s.replaceAll("(?i)<br\\s*/?>", "\n");
+	}
+
+	private String unescapeHtml(String s) {
+		if (s == null)
+			return null;
+		return s.replace("&lt;", "<")
+			.replace("&gt;", ">")
+			.replace("&quot;", "\"")
+			.replace("&#39;", "'")
+			.replace("&apos;", "'")
+			.replace("&amp;", "&");
+	}
+
+	private String normalizeHomepage(String raw) {
+		if (raw == null)
+			return null;
+		String t = raw.trim();
+		if (t.isEmpty())
+			return null;
+
+		// 엔티티 언이스케이프
+		t = unescapeHtml(t);
+
+		// 2) href="...": 따옴표 안 값만 빼기
+		Matcher mHref = Pattern.compile(
+			"href\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]",
+			Pattern.CASE_INSENSITIVE
+		).matcher(t);
+
+		String url = null;
+		if (mHref.find()) {
+			url = mHref.group(1).trim();
+		} else {
+			String noTags = t.replaceAll("(?s)<[^>]*>", " ");
+			Matcher mUrl = Pattern.compile(
+				"(?i)\\b((?:https?://|//|www\\.)[^\\s<]+)"
+			).matcher(noTags);
+			if (mUrl.find())
+				url = mUrl.group(1).trim();
+		}
+
+		if (url == null || url.isEmpty())
+			return null;
+
+		// 4) 스킴 보정 + 꼬리 문장부호 제거
+		if (url.startsWith("www."))
+			url = "https://" + url;
+		if (url.startsWith("//"))
+			url = "https:" + url;
+		url = url.replaceFirst("^http://", "https://");
+		url = url.replaceAll("[)\\]\\.,;]+$", ""); // 끝에 붙은 ) ] . , ; 등 제거
+
+		return url.isEmpty() ? null : url;
 	}
 
 }
