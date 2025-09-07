@@ -22,7 +22,7 @@ public class FestaBatchScheduler {
 	private final FestaService festaService;
 	private final AreaRepository areaRepository;
 
-	@Scheduled(cron = "0 1 0 * * *")
+	@Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
 	public void fetchAndSaveFestasBatch() {
 		log.info("축제 정보 수집 배치 정상 시작");
 		String eventStartDate = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
@@ -39,7 +39,7 @@ public class FestaBatchScheduler {
 		log.info("축제 정보 수집 완료");
 	}
 
-	@Scheduled(cron = "0 10 0 * * *")
+	@Scheduled(cron = "0 10 0 * * *", zone = "Asia/Seoul")
 	public void updateFestaStatusBatch() {
 		log.info("축제 상태 업데이트 시작");
 		try {
