@@ -127,4 +127,11 @@ public class Festa {
 	public void updateStatus(FestaStatus status) {
 		this.festaStatus = status;
 	}
+
+	public void updateImageIfEmpty(String url) {
+		if ((this.imageUrl == null || this.imageUrl.isBlank()) && url != null && !url.isBlank()) {
+			this.imageUrl = url;
+		}
+	}
+	
 }
