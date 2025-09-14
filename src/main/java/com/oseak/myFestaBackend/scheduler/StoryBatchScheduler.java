@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StoryBatchScheduler {
 	private final StoryService storyService;
 
-	@Scheduled(cron = "0 0 0 * * *")
+	@Scheduled(cron = "0 20 0 * * *", zone = "Asia/Seoul")
 	public void deleteStoryBatch() {
 		log.info("========== 스토리 삭제 시작 ==========");
 		try {

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,6 +118,9 @@ public class FestaService {
 
 					String festaUrl = commonMap.get("homepage");
 
+					String apiImage = toHttps(item.optString("firstimage"));
+					String resolvedImage = isBlank(apiImage) ? pickRandomDefaultImage() : apiImage;
+
 					Optional<Festa> optionalFesta = festaRepository.findById(festaId);
 					if (optionalFesta.isPresent()) {
 						log.info("기존 '{}' 행사 (festaId: {}) 업데이트 실행", title, festaId);
@@ -127,6 +131,8 @@ public class FestaService {
 							brToNewLine(introMap.get("usetimefestival")));
 						festa.updateUrl(festaUrl);
 						festa.updateStatus(status);
+						festa.updateImageIfEmpty(resolvedImage);
+
 						festaRepository.save(festa);
 					} else {
 						log.info("신규 '{}' 행사 (festaId: {}) 저장 실행", title, festaId);
@@ -140,7 +146,7 @@ public class FestaService {
 							.festaEndAt(endAt)
 							.areaCode(item.optInt("areacode"))
 							.subAreaCode(item.optInt("sigungucode"))
-							.imageUrl(toHttps(item.optString("firstimage")))
+							.imageUrl(resolvedImage)
 							.openTime(brToNewLine(introMap.get("playtime")))
 							.feeInfo(brToNewLine(introMap.get("usetimefestival")))
 							.festaStatus(status)
@@ -507,6 +513,22 @@ public class FestaService {
 		url = url.replaceAll("[)\\]\\.,;]+$", ""); // 끝에 붙은 ) ] . , ; 등 제거
 
 		return url.isEmpty() ? null : url;
+	}
+
+	private static final List<String> DEFAULT_FESTA_IMAGES = List.of(
+		"/images/festa/festaImg1.png",
+		"/images/festa/festaImg2.png",
+		"/images/festa/festaImg3.png"
+	);
+
+	private String pickRandomDefaultImage() {
+		return DEFAULT_FESTA_IMAGES.get(
+			ThreadLocalRandom.current().nextInt(DEFAULT_FESTA_IMAGES.size())
+		);
+	}
+
+	private static boolean isBlank(String s) {
+		return s == null || s.trim().isEmpty();
 	}
 
 }
