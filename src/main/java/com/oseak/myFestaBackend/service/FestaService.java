@@ -516,9 +516,9 @@ public class FestaService {
 	}
 
 	private static final List<String> DEFAULT_FESTA_IMAGES = List.of(
-		"/images/festa/festaImg1.png",
-		"/images/festa/festaImg2.png",
-		"/images/festa/festaImg3.png"
+		"https://my-festa.com/api/images/festa/festa01.png",
+		"https://my-festa.com/api/images/festa/festa02.png",
+		"https://my-festa.com/api/images/festa/festa03.png"
 	);
 
 	private String pickRandomDefaultImage() {
