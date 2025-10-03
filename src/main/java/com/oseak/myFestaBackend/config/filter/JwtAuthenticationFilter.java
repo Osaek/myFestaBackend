@@ -187,8 +187,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		// JWT 처리가 필요없는 경로들
 		return path.startsWith("/auth/login") ||
 			path.startsWith("/auth/refresh") ||
+			path.startsWith("/member/signup") ||
 			path.startsWith("/user/oauth/kakao") ||
 			path.startsWith("/login/oauth2/") ||
+			path.startsWith("/kakao/token") ||
 			path.startsWith("/swagger") ||
 			path.startsWith("/v3/api-docs") ||
 			path.equals("/") ||

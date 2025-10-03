@@ -30,9 +30,11 @@ import com.oseak.myFestaBackend.repository.MemberOauthTokenRepository;
 import com.oseak.myFestaBackend.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoApiService {
 
 	private final MemberRepository memberRepository;
@@ -51,6 +53,9 @@ public class KakaoApiService {
 
 	@Value("${kakao.redirect-uri}")
 	private String redirectUri;
+
+	@Value("${kakao.frontend-redirect-uri}")
+	private String frontendRedirectUri;
 
 	public String generateKakaoLoginUrl() {
 		return String.format(
@@ -74,7 +79,38 @@ public class KakaoApiService {
 				.bodyToMono(String.class)
 				.block();
 		} catch (WebClientResponseException e) {
-			throw new OsaekException(ServerErrorCode.TOKEN_REQUEST_FAILED);
+			log.error("Kakao token request failed. Status: {}, Response: {}",
+				e.getStatusCode(), e.getResponseBodyAsString());
+			throw new OsaekException(ServerErrorCode.TOKEN_REQUEST_FAILED, e);
+		}
+
+		try {
+			return objectMapper.readValue(response, new TypeReference<Map<String, Object>>() {
+			});
+		} catch (JsonProcessingException e) {
+			throw new OsaekException(ServerErrorCode.INVALID_JSON);
+		}
+	}
+
+	public Map<String, Object> getKakaoTokenForFrontend(String code) {
+		String response;
+		try {
+			log.info("Requesting Kakao token with code: {} and redirect_uri: {}", code, frontendRedirectUri);
+			response = webClient.post()
+				.uri("https://kauth.kakao.com/oauth/token")
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.body(BodyInserters.fromFormData("grant_type", "authorization_code")
+					.with("client_id", clientId)
+					.with("client_secret", clientSecret)
+					.with("redirect_uri", frontendRedirectUri)
+					.with("code", code))
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+		} catch (WebClientResponseException e) {
+			log.error("Kakao token request failed. Status: {}, Response: {}",
+				e.getStatusCode(), e.getResponseBodyAsString());
+			throw new OsaekException(ServerErrorCode.TOKEN_REQUEST_FAILED, e);
 		}
 
 		try {
@@ -138,6 +174,60 @@ public class KakaoApiService {
 		// String nickname = (String)profile.get("nickname");
 		// profile 추가시 사용
 		// String profileImage = (String)profile.get("profile_image_url");
+		String profileImage = profileGenerator.getRandomProfileImagePath();
+
+		if (email == null || nickname == null) {
+			throw new OsaekException(ServerErrorCode.MISSING_REQUIRED_FIELD);
+		}
+
+		Optional<Member> existingMember = memberRepository.findByEmail(email);
+		if (existingMember.isPresent()) {
+			saveOauthToken(existingMember.get().getId(), accessToken, refreshToken, accessExpiresAt, refreshExpiresAt);
+
+			return kakaoLoginResponseToken(email);
+		}
+
+		Member newMember = Member.builder()
+			.email(email)
+			.nickname(nickname)
+			.provider(Provider.KAKAO)
+			.profile(profileImage)
+			.build();
+
+		memberRepository.save(newMember);
+		saveOauthToken(newMember.getId(), accessToken, refreshToken, accessExpiresAt, refreshExpiresAt);
+
+		return kakaoLoginResponseToken(email);
+	}
+
+	@Transactional
+	public LoginResponseDto kakaoLoginProcessForFrontend(String code) {
+		Map<String, Object> tokenMap = getKakaoTokenForFrontend(code);
+		String accessToken = (String)tokenMap.get("access_token");
+		String refreshToken = (String)tokenMap.get("refresh_token");
+
+		long expiresIn = Long.parseLong(tokenMap.get("expires_in").toString());
+		long refreshExpiresIn = Long.parseLong(tokenMap.get("refresh_token_expires_in").toString());
+
+		LocalDateTime accessExpiresAt = LocalDateTime.ofInstant(
+			Instant.now().plusSeconds(expiresIn), ZoneId.systemDefault());
+		LocalDateTime refreshExpiresAt = LocalDateTime.ofInstant(
+			Instant.now().plusSeconds(refreshExpiresIn), ZoneId.systemDefault());
+
+		Map<String, Object> userInfo = getUserInfo(accessToken);
+
+		Map<String, Object> kakaoAccount;
+		Map<String, Object> profile;
+
+		try {
+			kakaoAccount = (Map<String, Object>)userInfo.get("kakao_account");
+			profile = (Map<String, Object>)kakaoAccount.get("profile");
+		} catch (Exception e) {
+			throw new OsaekException(ServerErrorCode.MALFORMED_RESPONSE);
+		}
+
+		String email = (String)kakaoAccount.get("email");
+		String nickname = nicknameGenerator.generate("ko");
 		String profileImage = profileGenerator.getRandomProfileImagePath();
 
 		if (email == null || nickname == null) {
