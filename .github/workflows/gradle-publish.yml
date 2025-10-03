@@ -38,6 +38,7 @@ env:
   DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
   TOUR_API_URL: ${{ secrets.TOUR_API_URL}}
   TOUR_API_SERVICE_KEY: ${{ secrets.TOUR_API_SERVICE_KEY }}
+  KAKAO_FRONTEND_REDIRECT_URL: ${{ secrets.KAKAO_FRONTEND_REDIRECT_URL}}
 
 jobs:
   test:
@@ -377,6 +378,7 @@ jobs:
             -e JWT_EXPIRATION_ACCESS_TOKEN="${{ env.JWT_EXPIRATION_ACCESS_TOKEN }}" \
             -e JWT_EXPIRATION_REFRESH_TOKEN="${{ env.JWT_EXPIRATION_REFRESH_TOKEN }}" \
             -e TOUR_API_SERVICE_KEY="${{ env.TOUR_API_SERVICE_KEY}}" \
+            -e KAKAO_FRONTEND_REDIRECT_URL="${{ env.KAKAO_FRONTEND_REDIRECT_URL}}" \
             --restart unless-stopped \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest)
           
