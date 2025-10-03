@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jre-alpine
 
 ENV TZ=Asia/Seoul
-RUN apk add --no-cache tzdata && \
+RUN apk add --no-cache tzdata ffmpeg && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
