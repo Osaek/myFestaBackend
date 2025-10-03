@@ -63,7 +63,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("/**").permitAll()
 				.requestMatchers("/swagger-resources/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-				.requestMatchers("/", "/login", "/kakao/login-url").permitAll()
+				.requestMatchers("/", "/login", "/kakao/login-url", "/kakao/token").permitAll()
 				.anyRequest().authenticated())
 			.httpBasic(AbstractHttpConfigurer::disable)  // HTTP Basic 인증도 비활성화
 

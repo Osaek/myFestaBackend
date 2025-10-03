@@ -18,6 +18,7 @@ import com.oseak.myFestaBackend.common.response.CommonResponse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 전역 예외를 처리하는 핸들러 클래스입니다.
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @Schema(name = "GlobalExceptionHandler", description = "전역 예외 처리 핸들러")
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalExceptionHandler {
 	private final MessageUtil messageUtil;
 
@@ -43,6 +45,7 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(OsaekException.class)
 	public ResponseEntity<CommonResponse<Void>> handleOsaekException(OsaekException ex) {
+		log.error(ex.getMessage(), ex);
 		BaseErrorCode errorCode = ex.getErrorCode();
 		return buildErrorResponse(errorCode);
 	}
@@ -56,10 +59,9 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<CommonResponse<Void>> handleGeneralError(Exception ex) {
 		ServerErrorCode errorCode = ServerErrorCode.INTERNAL_SERVER_ERROR;
-
+		log.error(ex.getMessage(), ex);
 		return buildErrorResponse(
-			errorCode,
-			ex.getMessage()
+			errorCode
 		);
 	}
 
