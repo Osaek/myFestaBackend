@@ -44,19 +44,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			final String authorizationHeader = request.getHeader("Authorization");
 			String jwt = null;
 
-			log.debug("Processing request: {} with Authorization header: {}",
-				request.getRequestURI(), authorizationHeader != null ? "present" : "missing");
-
 			// Authorization 헤더에서 JWT 토큰 추출
 			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 				jwt = jwtUtil.resolveToken(authorizationHeader);
-				log.debug("Extracted JWT token: {}", jwt != null ? "valid" : "null");
 
 				if (jwt != null && jwtUtil.isAccessToken(jwt)) {
 					if (jwtUtil.validateToken(jwt)) {
 						// 유효한 토큰 - 기존 로직
 						authenticateUser(request, jwt);
-						log.debug("JWT authentication successful for request: {}", request.getRequestURI());
 					} else {
 						// 만료된 토큰 - 자동 재발급 시도
 						String newAccessToken = attemptTokenRefresh(jwt);
@@ -64,21 +59,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							authenticateUser(request, jwt, newAccessToken);
 							response.setHeader("Authorization", "Bearer " + newAccessToken);
 							response.setHeader("Token-Refreshed", "true");
-							log.info("Access token automatically refreshed for request: {}", request.getRequestURI());
-						} else {
-							log.warn("JWT token refresh failed for request: {}", request.getRequestURI());
+							log.info("Token auto-refreshed");
 						}
 					}
-				} else if (jwt != null) {
-					log.warn("Invalid token type for request: {}", request.getRequestURI());
 				}
-			} else {
-				log.debug("No Authorization header found for request: {}", request.getRequestURI());
 			}
 
 			filterChain.doFilter(request, response);
 		} catch (OsaekException ex) {
-			log.error("JWT authentication error: {} for request: {}", ex.getMessage(), request.getRequestURI());
+			log.error("JWT authentication error: {}", ex.getErrorCode().getCode());
 			handleJwtException(request, response, filterChain, ex);
 		} catch (Exception ex) {
 			log.error("Unexpected error in JWT filter", ex);
@@ -97,7 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String nickname = claims.get("nickname", String.class);
 		Provider provider = Provider.valueOf(claims.get("provider", String.class));
 
-		log.debug("Authenticating user - memberId: {}, email: {}, nickname: {}", memberId, email, nickname);
+		log.debug("Authenticating user - memberId: {}, email: {}", memberId, email);
 
 		Member member = Member.builder()
 			.email(email)
@@ -125,11 +114,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			Long newMemberId = jwtUtil.getMemberIdFromToken(newJwt);
 			if (!memberId.equals(newMemberId)) {
-				log.error("Token memberId mismatch during refresh: old={}, new={}", memberId, newMemberId);
+				log.error("Token memberId mismatch during refresh");
 				throw new OsaekException(ClientErrorCode.JWT_TOKEN_INVALID);
 			}
 		} catch (Exception e) {
-			log.warn("Could not validate new token memberId: {}", e.getMessage());
+			log.error("Could not validate new token memberId");
 		}
 
 		Member member = Member.builder()
@@ -146,8 +135,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 		SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-		log.debug("Authentication completed using refreshed token for member: {}", memberId);
 	}
 
 	// 자동 토큰 재발급 메서드
@@ -187,8 +174,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		// JWT 처리가 필요없는 경로들
 		return path.startsWith("/auth/login") ||
 			path.startsWith("/auth/refresh") ||
+			path.startsWith("/member/signup") ||
 			path.startsWith("/user/oauth/kakao") ||
 			path.startsWith("/login/oauth2/") ||
+			path.startsWith("/kakao/token") ||
 			path.startsWith("/swagger") ||
 			path.startsWith("/v3/api-docs") ||
 			path.equals("/") ||

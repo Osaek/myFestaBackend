@@ -51,8 +51,10 @@ public class AuthService {
 				throw new OsaekException(AUTH_LOGIN_METHOD_INVALID);
 			}
 
+			log.info("Login successful - email: {}", request.getEmail());
 			return createJwtToken(member);
 		} catch (Exception e) {
+			log.warn("Login failed - email: {}", request.getEmail());
 			throw e;
 		}
 	}

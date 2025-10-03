@@ -19,7 +19,7 @@ public class CreateUserRequestDto {
 	@Size(max = 256, message = "{validation.email.size}")
 	private String email;
 
-	@NotBlank(message = "{validation.password.required}")
+	@NotBlank(message = "{validation.password.requiredㅌ}")
 	@Size(min = 8, message = "{validation.password.size}")
 	private String password;
 

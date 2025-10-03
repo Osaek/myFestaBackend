@@ -92,4 +92,50 @@ public class KakaoController {
 
 		return "redirect:/"; // TODO: 성공 후 이동할 URL 확정
 	}
+
+	@Operation(
+		summary = "카카오 로그인 - 인가 코드로 JWT 토큰 발급 (프론트엔드용)",
+		description = "프론트엔드에서 받은 카카오 인가 코드(code)를 사용하여 JWT 토큰을 발급합니다. 프론트엔드가 카카오 로그인을 직접 처리하고 인가 코드만 전달하는 방식입니다.",
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "로그인 성공",
+				content = @io.swagger.v3.oas.annotations.media.Content(
+					mediaType = "application/json",
+					examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+						name = "성공 응답",
+						value = """
+							{
+							    "status": 200,
+							    "message": "요청이 성공했습니다.",
+							    "data": {
+							        "memberId": 1,
+							        "email": "user@kakao.com",
+							        "nickname": "사용자",
+							        "profile": "/images/profile/default.png",
+							        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+							        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+							    }
+							}
+							"""
+					)
+				)
+			),
+			@ApiResponse(
+				responseCode = "400",
+				description = "잘못된 인가 코드"
+			),
+			@ApiResponse(
+				responseCode = "500",
+				description = "카카오 API 호출 실패 또는 토큰 처리 오류"
+			)
+		}
+	)
+	@GetMapping("/kakao/token")
+	public org.springframework.http.ResponseEntity<com.oseak.myFestaBackend.common.response.CommonResponse<LoginResponseDto>> getKakaoTokenFromCode(
+		@RequestParam("code") String code) {
+		LoginResponseDto result = kakaoApiService.kakaoLoginProcessForFrontend(code);
+		return org.springframework.http.ResponseEntity.ok(
+			com.oseak.myFestaBackend.common.response.CommonResponse.success(result));
+	}
 }
