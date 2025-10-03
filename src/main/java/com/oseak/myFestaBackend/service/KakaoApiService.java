@@ -95,7 +95,7 @@ public class KakaoApiService {
 	public Map<String, Object> getKakaoTokenForFrontend(String code) {
 		String response;
 		try {
-			log.info("Requesting Kakao token with code: {} and redirect_uri: {}", code, frontendRedirectUri);
+			log.debug("Kakao token request initiated with code: {}", code);
 			response = webClient.post()
 				.uri("https://kauth.kakao.com/oauth/token")
 				.header("Content-Type", "application/x-www-form-urlencoded")
@@ -237,7 +237,7 @@ public class KakaoApiService {
 		Optional<Member> existingMember = memberRepository.findByEmail(email);
 		if (existingMember.isPresent()) {
 			saveOauthToken(existingMember.get().getId(), accessToken, refreshToken, accessExpiresAt, refreshExpiresAt);
-
+			log.info("Kakao login successful - email: {}", email);
 			return kakaoLoginResponseToken(email);
 		}
 
@@ -250,7 +250,7 @@ public class KakaoApiService {
 
 		memberRepository.save(newMember);
 		saveOauthToken(newMember.getId(), accessToken, refreshToken, accessExpiresAt, refreshExpiresAt);
-
+		log.info("Kakao signup successful - email: {}", email);
 		return kakaoLoginResponseToken(email);
 	}
 
