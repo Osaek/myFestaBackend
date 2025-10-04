@@ -49,7 +49,7 @@ public class StoryService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public Page<StoryItem> search(StorySearchRequestDto request, Long viewerMemberId) {
+	public Page<Story> searchStories(StorySearchRequestDto request, Long viewerMemberId) {
 		Specification<Story> spec = StorySpecification.createSpecification(request, viewerMemberId);
 
 		Pageable pageable =
@@ -60,11 +60,10 @@ public class StoryService {
 					.and(Sort.by("storyId").descending())
 			);
 
-		Page<Story> page = storyRepository.findAll(spec, pageable);
-		return page.map(StoryItem::from);
+		return storyRepository.findAll(spec, pageable);
 	}
 
-	public StoryItem getStory(String storyCode, Long requesterMemberId) {
+	public Story getStoryEntity(String storyCode, Long requesterMemberId) {
 		final long storyId;
 		try {
 			storyId = ShortCodeUtil.decode(storyCode);
@@ -77,7 +76,7 @@ public class StoryService {
 
 		// 스토리 공개일 경우
 		if (story.getIsOpen()) {
-			return StoryItem.from(story);
+			return story;
 		}
 
 		// 스토리 비공개일 경우, 스토리 소유자와 요청자 일치여부 확인
@@ -89,11 +88,11 @@ public class StoryService {
 			throw new OsaekException(FORBIDDEN);
 		}
 
-		return StoryItem.from(story);
+		return story;
 	}
 
 	@Transactional
-	public StoryItem updateStoryVisibility(StoryVisibilityUpdateRequestDto request, Long requesterId) {
+	public Story updateStoryVisibilityEntity(StoryVisibilityUpdateRequestDto request, Long requesterId) {
 		if (requesterId == null)
 			throw new OsaekException(USER_UNAUTHORIZED_ACCESS);
 		log.debug("storyCode: {}", request.getStoryCode());
@@ -120,7 +119,7 @@ public class StoryService {
 		// 멱등 처리: 목표 상태와 다를 때만 변경
 		Boolean target = request.getIsOpen();
 		if (Objects.equals(target, story.getIsOpen())) {
-			return StoryItem.from(story);
+			return story;
 		}
 
 		if (Boolean.TRUE.equals(target)) {
@@ -129,7 +128,7 @@ public class StoryService {
 			story.hideStory();
 		}
 
-		return StoryItem.from(story);
+		return story;
 	}
 
 	@Transactional
@@ -313,7 +312,7 @@ public class StoryService {
 
 	}
 
-	public StoryItem uploadStoryAsync(StoryUploadRequestDto requestDto, Long memberId) {
+	public Story uploadStoryAsyncEntity(StoryUploadRequestDto requestDto, Long memberId) {
 		// 1. 미디어 타입 확인
 		MediaType mediaType = MediaType.detectFromFile(requestDto.getFile());
 		log.debug("Starting story upload for mediaType: {}", mediaType);
@@ -338,7 +337,7 @@ public class StoryService {
 		));
 
 		// 4. 반환
-		return StoryItem.from(savedStory);
+		return savedStory;
 	}
 
 	@EventListener

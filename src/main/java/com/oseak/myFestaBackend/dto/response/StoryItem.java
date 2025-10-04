@@ -13,6 +13,7 @@ import lombok.Getter;
 public class StoryItem {
 	private String storyCode;
 	private Long memberId;
+	private String nickname;
 	private Boolean isOpen;
 	private String thumbnailUrl;
 	private String festaName;
@@ -20,10 +21,11 @@ public class StoryItem {
 	private String storyS3Url;
 	private LocalDateTime createdAt;
 
-	public static StoryItem from(Story story) {
+	public static StoryItem from(Story story, String nickname) {
 		return StoryItem.builder()
 			.storyCode(ShortCodeUtil.encode(story.getStoryId()))
 			.memberId(story.getMemberId())
+			.nickname(nickname)
 			.isOpen(story.getIsOpen())
 			.thumbnailUrl(story.getThumbnailUrl())
 			.storyS3Url(story.getStoryS3Url())

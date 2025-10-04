@@ -108,4 +108,10 @@ public class MemberService {
 			.message("Password changed successfully!")
 			.build();
 	}
+
+	public String getNicknameByMemberId(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new OsaekException(USER_ID_NOT_FOUND));
+		return member.getNickname();
+	}
 }
