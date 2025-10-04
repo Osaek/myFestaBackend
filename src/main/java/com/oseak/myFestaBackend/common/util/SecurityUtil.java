@@ -39,6 +39,17 @@ public class SecurityUtil {
 		return getCurrentUser().getMemberId();
 	}
 
+	public static Long getCurrentUserIdOrNull() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+			CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
+			return userDetails.getMemberId();
+		}
+
+		return null;
+	}
+
 	public static Member getCurrentMember() {
 		return getCurrentUser().getMember();
 	}
