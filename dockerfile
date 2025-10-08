@@ -8,5 +8,20 @@ RUN apk add --no-cache tzdata ffmpeg && \
 WORKDIR /app
 COPY build/libs/*.jar app.jar
 EXPOSE 8080
-ENV JAVA_OPTS="-Xms256m -Xmx256m -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=192m -XX:+UseG1GC -XX:+UseStringDeduplication -Xlog:gc*:gc.log:time"
+ENV JAVA_OPTS="\
+    -Xms768m \
+    -Xmx768m \
+    -XX:MetaspaceSize=128m \
+    -XX:MaxMetaspaceSize=256m \
+    -XX:+UseG1GC \
+    -XX:MaxGCPauseMillis=200 \
+    -XX:ParallelGCThreads=2 \
+    -XX:ConcGCThreads=1 \
+    -XX:+UseStringDeduplication \
+    -XX:+OptimizeStringConcat \
+    -XX:+UseCompressedOops \
+    -XX:+UseCompressedClassPointers \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dfile.encoding=UTF-8 \
+    -Duser.timezone=Asia/Seoul"
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
