@@ -1,6 +1,5 @@
 package com.oseak.myFestaBackend.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.common.response.CommonResponse;
-import com.oseak.myFestaBackend.dto.ReviewResponseDto;
 import com.oseak.myFestaBackend.dto.request.ReviewRequestDto;
+import com.oseak.myFestaBackend.dto.response.ReviewListResponseDto;
 import com.oseak.myFestaBackend.service.ReviewService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -119,16 +118,20 @@ public class ReviewController {
 			@Parameter(name = "page", description = "페이지 번호(0부터 시작)", example = "0"),
 			@Parameter(name = "size", description = "페이지 크기(얼마나 조회할지)", example = "10"),
 			@Parameter(name = "sort", description = "정렬 기준(latest,oldest,highest,lowest) latest가 default", example = "latest")
+		},
+		responses = {
+			@ApiResponse(responseCode = "200", description = "리뷰 목록 조회 성공",
+				content = @Content(schema = @Schema(implementation = ReviewListResponseDto.class)))
 		}
 	)
 	@GetMapping("/detail")
-	public ResponseEntity<CommonResponse<Page<ReviewResponseDto>>> getByFesta(
+	public ResponseEntity<CommonResponse<ReviewListResponseDto>> getByFesta(
 		@RequestParam Long festaId,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam(defaultValue = "latest") String sort
 	) {
-		Page<ReviewResponseDto> result = reviewService.getReviewsByFesta(festaId, page, size, sort);
+		ReviewListResponseDto result = reviewService.getReviewsByFesta(festaId, page, size, sort);
 		return ResponseEntity.ok(CommonResponse.success(result));
 	}
 }
