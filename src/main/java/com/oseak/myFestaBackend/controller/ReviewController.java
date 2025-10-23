@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -132,6 +133,34 @@ public class ReviewController {
 		@RequestParam(defaultValue = "latest") String sort
 	) {
 		ReviewListResponseDto result = reviewService.getReviewsByFesta(festaId, page, size, sort);
+		return ResponseEntity.ok(CommonResponse.success(result));
+	}
+
+	@Operation(
+		summary = "내 리뷰 목록 조회",
+		description = "로그인한 사용자의 리뷰 목록을 페이징으로 조회합니다. 요청한 memberId와 현재 로그인한 사용자가 일치해야 합니다.",
+		security = @SecurityRequirement(name = "bearerAuth"),
+		parameters = {
+			@Parameter(name = "memberId", description = "회원 ID", required = true, example = "101"),
+			@Parameter(name = "page", description = "페이지 번호(0부터 시작)", example = "0"),
+			@Parameter(name = "size", description = "페이지 크기(얼마나 조회할지)", example = "10"),
+			@Parameter(name = "sort", description = "정렬 기준(latest,oldest,highest,lowest) latest가 default", example = "latest")
+		},
+		responses = {
+			@ApiResponse(responseCode = "200", description = "내 리뷰 목록 조회 성공",
+				content = @Content(schema = @Schema(implementation = ReviewListResponseDto.class))),
+			@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+			@ApiResponse(responseCode = "403", description = "권한 없음 (다른 사용자의 리뷰 조회 시도)")
+		}
+	)
+	@GetMapping("/my")
+	public ResponseEntity<CommonResponse<ReviewListResponseDto>> getMyReviews(
+		@RequestParam Long memberId,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(defaultValue = "latest") String sort
+	) {
+		ReviewListResponseDto result = reviewService.getMyReviews(memberId, page, size, sort);
 		return ResponseEntity.ok(CommonResponse.success(result));
 	}
 }

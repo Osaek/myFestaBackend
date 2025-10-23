@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.oseak.myFestaBackend.common.exception.OsaekException;
 import com.oseak.myFestaBackend.common.exception.code.ClientErrorCode;
 import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
+import com.oseak.myFestaBackend.common.util.SecurityUtil;
 import com.oseak.myFestaBackend.dto.ReviewResponseDto;
 import com.oseak.myFestaBackend.dto.response.ReviewListResponseDto;
 import com.oseak.myFestaBackend.entity.Festa;
@@ -121,6 +122,35 @@ public class ReviewService {
 					.orElseThrow(() -> new OsaekException(ClientErrorCode.USER_ID_NOT_FOUND));
 				return ReviewResponseDto.of(review, member.getNickname(), member.getProfile());
 			});
+
+		return ReviewListResponseDto.from(reviewPage);
+	}
+
+	@Transactional
+	public ReviewListResponseDto getMyReviews(Long memberId, int page, int size, String sort) {
+		// 현재 로그인한 사용자와 요청한 memberId가 동일한지 확인
+		Long currentUserId = SecurityUtil.getCurrentUserId();
+		if (!currentUserId.equals(memberId)) {
+			throw new OsaekException(ClientErrorCode.USER_UNAUTHORIZED_ACCESS);
+		}
+
+		// Member 존재 여부 확인
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new OsaekException(ClientErrorCode.USER_ID_NOT_FOUND));
+
+		Sort sortSpec = switch (sort == null ? "latest" : sort) {
+			case "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt");
+			case "highest" -> Sort.by(Sort.Direction.DESC, "score");
+			case "lowest" -> Sort.by(Sort.Direction.ASC, "score");
+			default -> Sort.by(Sort.Direction.DESC, "createdAt");
+		};
+
+		page = Math.max(0, page);
+		size = Math.max(1, Math.min(size, 50));
+
+		Pageable pageable = PageRequest.of(page, size, sortSpec);
+		Page<ReviewResponseDto> reviewPage = reviewRepository.findById_MemberId(memberId, pageable)
+			.map(review -> ReviewResponseDto.of(review, member.getNickname(), member.getProfile()));
 
 		return ReviewListResponseDto.from(reviewPage);
 	}
