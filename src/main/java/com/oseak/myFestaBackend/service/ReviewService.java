@@ -11,10 +11,12 @@ import com.oseak.myFestaBackend.common.exception.code.ServerErrorCode;
 import com.oseak.myFestaBackend.dto.ReviewResponseDto;
 import com.oseak.myFestaBackend.entity.Festa;
 import com.oseak.myFestaBackend.entity.FestaStatistic;
+import com.oseak.myFestaBackend.entity.Member;
 import com.oseak.myFestaBackend.entity.Review;
 import com.oseak.myFestaBackend.entity.ReviewId;
 import com.oseak.myFestaBackend.repository.FestaRepository;
 import com.oseak.myFestaBackend.repository.FestaStatisticRepository;
+import com.oseak.myFestaBackend.repository.MemberRepository;
 import com.oseak.myFestaBackend.repository.ReviewRepository;
 
 import jakarta.transaction.Transactional;
@@ -27,6 +29,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final FestaRepository festaRepository;
 	private final FestaStatisticRepository festaStatisticRepository;
+	private final MemberRepository memberRepository;
 
 	@Transactional
 	public void createReview(Long memberId, Long festaId, double score, String imageUrl, String description) {
@@ -37,6 +40,11 @@ public class ReviewService {
 
 		Festa festa = festaRepository.findById(festaId)
 			.orElseThrow(() -> new OsaekException(ServerErrorCode.FESTA_NOT_FOUND));
+
+		// Member 존재 여부만 확인
+		if (!memberRepository.existsById(memberId)) {
+			throw new OsaekException(ServerErrorCode.USER_ID_NOT_FOUND);
+		}
 
 		Review review = Review.builder()
 			.memberId(memberId)
@@ -105,6 +113,11 @@ public class ReviewService {
 
 		Pageable pageable = PageRequest.of(page, size, sortSpec);
 		return reviewRepository.findByFesta_FestaId(festaId, pageable)
-			.map(ReviewResponseDto::from);
+			.map(review -> {
+				Long memberId = review.getId().getMemberId();
+				Member member = memberRepository.findById(memberId)
+					.orElseThrow(() -> new OsaekException(ServerErrorCode.USER_ID_NOT_FOUND));
+				return ReviewResponseDto.of(review, member.getNickname(), member.getProfile());
+			});
 	}
 }
