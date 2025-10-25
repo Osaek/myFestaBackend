@@ -20,8 +20,8 @@ import com.oseak.myFestaBackend.dto.request.StoryUploadRequestDto;
 import com.oseak.myFestaBackend.dto.request.StoryVisibilityUpdateRequestDto;
 import com.oseak.myFestaBackend.dto.response.StoryItem;
 import com.oseak.myFestaBackend.dto.response.StorySearchResponseDto;
+import com.oseak.myFestaBackend.facade.StoryFacade;
 import com.oseak.myFestaBackend.service.S3Service;
-import com.oseak.myFestaBackend.service.StoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "Story API", description = "스토리 관련 API(Controller)")
 public class StoryController {
 
-	private final StoryService storyService;
+	private final StoryFacade storyFacade;
 	private final S3Service s3Service;
 
 	// @PostMapping("/upload")
@@ -67,7 +67,7 @@ public class StoryController {
 		log.info("IsOpen: {}", request.getIsOpen());
 
 		Long requesterMemberId = SecurityUtil.getCurrentUserId();
-		StoryItem storyItem = storyService.uploadStoryAsync(request, requesterMemberId);
+		StoryItem storyItem = storyFacade.uploadStoryAsync(request, requesterMemberId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storyItem));
 	}
 
@@ -117,10 +117,10 @@ public class StoryController {
 		log.debug("받은 요청: keyword={} memberId={} festaId={} includePrivateMine={}",
 			request.getKeyword(), request.getMemberId(), request.getFestaId(), request.getIncludePrivateMine());
 
-		Long viewerMemberId = SecurityUtil.getCurrentUserId();
+		Long viewerMemberId = SecurityUtil.getCurrentUserIdOrNull();
 		log.debug("요청회원: {}", viewerMemberId);
 
-		Page<StoryItem> stories = storyService.search(request, viewerMemberId);
+		Page<StoryItem> stories = storyFacade.searchStories(request, viewerMemberId);
 		return ResponseEntity.ok(CommonResponse.success(StorySearchResponseDto.from(stories)));
 	}
 
@@ -130,8 +130,8 @@ public class StoryController {
 		@PathVariable @Parameter(description = "스토리 코드") String storyCode) {
 		log.debug("스토리 단건 조회: storyCode:{}", storyCode);
 
-		Long requesterMemberId = SecurityUtil.getCurrentUserId();
-		StoryItem story = storyService.getStory(storyCode, requesterMemberId);
+		Long requesterMemberId = SecurityUtil.getCurrentUserIdOrNull();
+		StoryItem story = storyFacade.getStory(storyCode, requesterMemberId);
 		return ResponseEntity.ok(CommonResponse.success(story));
 	}
 
@@ -142,7 +142,7 @@ public class StoryController {
 		log.debug("공개/비공개 설정: storyCode:{}, isOpen:{}", request.getStoryCode(), request.getIsOpen());
 
 		Long requestMemberId = SecurityUtil.getCurrentUserId();
-		StoryItem story = storyService.updateStoryVisibility(request, requestMemberId);
+		StoryItem story = storyFacade.updateStoryVisibility(request, requestMemberId);
 		return ResponseEntity.ok(CommonResponse.success(story));
 	}
 
@@ -153,7 +153,7 @@ public class StoryController {
 		log.debug("스토리 삭제: storyCode:{}", storyCode);
 
 		Long requesterMemberId = SecurityUtil.getCurrentUserId();
-		storyService.softDeleteStory(storyCode, requesterMemberId);
+		storyFacade.softDeleteStory(storyCode, requesterMemberId);
 		return ResponseEntity.ok(CommonResponse.noContent());
 	}
 }

@@ -39,6 +39,7 @@ public class MemberService {
 	public CreateUserResponseDto createUser(CreateUserRequestDto request) {
 
 		if (memberRepository.existsByEmailAndIsWithdrawnIsFalse(request.getEmail())) {
+			log.warn("Signup failed - duplicate email: {}", request.getEmail());
 			throw new OsaekException(USER_EMAIL_DUPLICATE);
 		}
 
@@ -62,6 +63,7 @@ public class MemberService {
 
 		memberPasswordRepository.save(memberPassword);
 
+		log.info("Signup successful - email: {}", request.getEmail());
 		return new CreateUserResponseDto(savedMember);
 	}
 
@@ -79,6 +81,7 @@ public class MemberService {
 
 		memberPasswordRepository.delete(memberPassword);
 
+		log.info("Withdrawal successful - email: {}", member.getEmail());
 		return WithdrawMemberResponseDto.builder()
 			.email(member.getEmail())
 			.nickname(member.getNickname())
@@ -104,5 +107,11 @@ public class MemberService {
 		return ChangePasswordResponseDto.builder()
 			.message("Password changed successfully!")
 			.build();
+	}
+
+	public String getNicknameByMemberId(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new OsaekException(USER_ID_NOT_FOUND));
+		return member.getNickname();
 	}
 }

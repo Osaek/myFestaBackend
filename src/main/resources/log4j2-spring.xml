@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATH">./logs</Property>
+        <Property name="LOG_FILE_NAME">myFesta</Property>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 콘솔 출력 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <!-- 일반 로그 파일 - 일별 롤링, 3일 보관 -->
+        <RollingFile name="File" fileName="${LOG_PATH}/${LOG_FILE_NAME}.log"
+                     filePattern="${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+        <!-- 에러 로그 파일 - 일별 롤링, 7일 보관 -->
+        <RollingFile name="ErrorFile" fileName="${LOG_PATH}/${LOG_FILE_NAME}-error.log"
+                     filePattern="${LOG_PATH}/${LOG_FILE_NAME}-error.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <!-- 요청 로그 파일 - 일별 롤링, 3일 보관 -->
+        <RollingFile name="RequestFile" fileName="${LOG_PATH}/${LOG_FILE_NAME}-request.log"
+                     filePattern="${LOG_PATH}/${LOG_FILE_NAME}-request.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Spring Boot 기본 로그는 WARN 레벨만 -->
+        <Logger name="org.springframework" level="WARN"/>
+        <Logger name="org.hibernate" level="WARN"/>
+        <Logger name="com.zaxxer.hikari" level="WARN"/>
+
+        <!-- 요청 로깅용 별도 Logger -->
+        <Logger name="com.oseak.myFestaBackend.REQUEST" level="INFO" additivity="false">
+            <AppenderRef ref="RequestFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- 애플리케이션 로그 -->
+        <Logger name="com.oseak.myFestaBackend" level="DEBUG"/>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>

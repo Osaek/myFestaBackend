@@ -9,4 +9,5 @@ import com.oseak.myFestaBackend.entity.ReviewId;
 
 public interface ReviewRepository extends JpaRepository<Review, ReviewId> {
 	Page<Review> findByFesta_FestaId(Long festaId, Pageable pageable);
+	Page<Review> findById_MemberId(Long memberId, Pageable pageable);
 }
