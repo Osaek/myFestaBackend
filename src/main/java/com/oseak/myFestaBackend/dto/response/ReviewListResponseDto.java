@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 import com.oseak.myFestaBackend.common.response.PageInfo;
-import com.oseak.myFestaBackend.dto.ReviewResponseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

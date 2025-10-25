@@ -1,6 +1,6 @@
-package com.oseak.myFestaBackend.dto;
+package com.oseak.myFestaBackend.dto.response;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.oseak.myFestaBackend.entity.Review;
 
@@ -14,6 +14,9 @@ import lombok.Getter;
 public class ReviewResponseDto {
 	@Schema(description = "축제 ID", example = "2612919")
 	private Long festaId;
+
+	@Schema(description = "축제 명", example = "이건 테스트 축제")
+	private String festaName;
 
 	@Schema(description = "회원 ID", example = "101")
 	private Long memberId;
@@ -34,11 +37,12 @@ public class ReviewResponseDto {
 	private String description;
 
 	@Schema(description = "작성일", example = "2025-01-20")
-	private LocalDate createdAt;
+	private LocalDateTime createdAt;
 
 	public static ReviewResponseDto of(Review review, String memberNickname, String memberProfileUrl) {
 		return ReviewResponseDto.builder()
 			.festaId(review.getId().getFestaId())
+			.festaName(review.getFesta().getFestaName())
 			.memberId(review.getId().getMemberId())
 			.memberNickname(memberNickname)
 			.memberProfileUrl(memberProfileUrl)
